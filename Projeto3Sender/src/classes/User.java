@@ -5,10 +5,12 @@ public class User{
 	private String username;
 	private String password;
 	private boolean admin;
+	private boolean activated;
 	public User(String username, String password) {
 		this.username=username;
 		this.password=password;
-		admin=false;
+		this.admin=false;
+		this.activated=true;
 	}
 	public String getUsername() {
 		return username;
@@ -27,6 +29,12 @@ public class User{
 	}
 	public void setAdmin(boolean admin) {
 		this.admin = admin;
+	}
+	public boolean isActivated() {
+		return activated;
+	}
+	public void setActivated(boolean activated) {
+		this.activated = activated;
 	}
 
 }

@@ -7,6 +7,7 @@ import javax.naming.NamingException;
 
 import classes.AsyncReceiver;
 import classes.Sender;
+import classes.User;
 
 public class ClientResearcher {
 	public static void main(String[] args) {
@@ -31,6 +32,7 @@ public class ClientResearcher {
 				System.out.print("Escolha uma password: ");
 				password = scanner.nextLine();  // Read user input
 				System.out.println("\n");
+				User utilizador = new User(username,password);
 				//Enviar msg ao admin para confirmar registo
 				
 			}
@@ -83,7 +85,7 @@ public class ClientResearcher {
 		
 		
 		//MENU DE USER
-		public void appoption() {
+		public void appuser() {
 			boolean done  = false;
 		    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 			String bookname,type,date;
@@ -150,6 +152,66 @@ public class ClientResearcher {
 					//Enviar mensagem a pedir info ao admin
 				}
 				
+				//EXIT
+				if(option==5) {
+					System.out.println("You have successfully logged out.");
+	                done = true;
+				}
+			}
+		}
+		
+		
+		
+		//MENU DE ADMIN
+		public void appadmin() {
+			boolean done  = false;
+		    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
+			String user,bookname;
+			while(!done) {
+				System.out.println("****************JMS App****************");
+				System.out.println("Escolha uma opcao: ");
+				System.out.println("(0) List Users ");
+				System.out.println("(1) List Pending Tasks ");
+				System.out.println("(2) Deactivate User ");
+				System.out.println("(3) List Publications ");
+				System.out.println("(4) Search Publication ");
+				System.out.println("(5) Logout ");
+				System.out.println("\n");
+
+				int option = lerInt(0, 6);
+				
+				//LIST ALL USERS
+				if(option==0) {
+					
+				}
+						
+						
+				//LIST PENDING TASKS
+				if(option==1) {
+							
+				}
+						
+				//DEACTIVATE USER
+				if(option==2) {
+					System.out.println("****************DEACTIVATE JMS****************");
+					System.out.print("Nome do user: ");
+				    user = scanner.nextLine();  // Read user input
+					System.out.println("\n");
+				}
+						
+				//LIST PUBLICATIONS
+				if(option==3) {
+							
+				}
+						
+				//SEARCH PUBLICATION
+				if(option==4) {
+					System.out.println("****************SEARCH JMS****************");
+					System.out.print("Nome da publicacao: ");
+				    bookname = scanner.nextLine();  // Read user input
+					System.out.println("\n");
+				}
+						
 				//EXIT
 				if(option==5) {
 					System.out.println("You have successfully logged out.");
