@@ -72,7 +72,7 @@ public class ClientResearcher {
 				System.out.println("\n");
 				//Enviar msg ao admin para login
 				
-				//Apï¿½s confirmar aceder ï¿½ app
+				//Após confirmar aceder à app
 			}
 			
 			//EXIT
@@ -261,6 +261,7 @@ public class ClientResearcher {
 
 		
 		//RECEIVE A MESSAGE
+		public void printresponse() throws NamingException {
 			AsyncReceiver asyncReceiver = new AsyncReceiver();
 			asyncReceiver.launch_and_wait();
 		}
@@ -273,6 +274,7 @@ public class ClientResearcher {
 		
 		
 		//SEND A MESSAGE
+		public void sendmessage(String message) throws NamingException {
 			Sender sender = new Sender();
 			sender.send(message);
 		}
@@ -570,7 +572,7 @@ public class ClientResearcher {
 			//REMOVE(Remover:TestePubv2)
 			else if(tokens[0].compareTo("Remover")==0) {
 				RemovePublication(tokens[1]);
-				System.out.println("Publicaï¿½ï¿½o removida!");
+				System.out.println("Publicação removida!");
 			}
 			else {
 				System.out.println("Something went wrong with parsing! :(");
