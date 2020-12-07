@@ -25,7 +25,7 @@ public class Publication implements Serializable{
    		
    	}
    	
-   	public Publication(String name, String type, String date, String description) {
+   	public Publication(String name, String type, String date) {
    		this.name=name;
    		this.type=type;
    		this.date=date;

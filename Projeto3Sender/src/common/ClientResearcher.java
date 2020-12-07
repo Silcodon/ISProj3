@@ -2,6 +2,12 @@ package common;
 
 import java.util.Scanner;
 
+import javax.jms.JMSException;
+import javax.naming.NamingException;
+
+import classes.AsyncReceiver;
+import classes.Sender;
+
 public class ClientResearcher {
 	public static void main(String[] args) {
 		String username,password;
@@ -75,6 +81,8 @@ public class ClientResearcher {
 			return num;
 		}
 		
+		
+		//MENU DE USER
 		public void appoption() {
 			boolean done  = false;
 		    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
@@ -148,5 +156,30 @@ public class ClientResearcher {
 	                done = true;
 				}
 			}
+		}
+		
+		//RECEIVE A MESSAGE
+		public void printresponse() throws NamingException {
+			AsyncReceiver asyncReceiver = new AsyncReceiver();
+			asyncReceiver.launch_and_wait();
+		}
+		
+		//RECEIVE AND REPLY
+		public void printandrespond() throws NamingException, JMSException {
+			AsyncReceiver asyncReceiver = new AsyncReceiver();
+			asyncReceiver.receive_and_reply();
+		}
+		
+		
+		//SEND A MESSAGE
+		public void sendmessage(String message) throws NamingException {
+			Sender sender = new Sender();
+			sender.send(message);
+		}
+		
+		//SEND MESSAGE AND PRINT RESPONSE
+		public void sendandreceive(String message) throws NamingException {
+			Sender sender = new Sender();
+			sender.send_and_reply(message);
 		}
 }
