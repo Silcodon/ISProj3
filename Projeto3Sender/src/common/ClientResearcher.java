@@ -1,15 +1,25 @@
 package common;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Properties;
 import java.util.Scanner;
 
 import javax.jms.JMSException;
+import javax.naming.Context;
+import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 
 import classes.AsyncReceiver;
 import classes.Sender;
 import classes.User;
 
 public class ClientResearcher {
+	@PersistenceContext(name = "Loader")
+	private EntityManager em;
 	public static void main(String[] args) {
 		String username,password;
 	    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
@@ -243,5 +253,29 @@ public class ClientResearcher {
 		public void sendandreceive(String message) throws NamingException {
 			Sender sender = new Sender();
 			sender.send_and_reply(message);
+		}
+		
+		//GET ALL PUBS
+		public List<Publication> Getall(){
+		    // Define query String
+		    String jpql = "SELECT r FROM Publication r";
+		    // Create a (typed) query
+		    TypedQuery<Publication> typedQuery = em.createQuery(jpql, Publication.class);
+		    // Query and get result
+		    List<Publication> mylist = typedQuery.getResultList();
+		    return mylist;
+		 }
+		    
+		//GET PUBS BY NOME	
+		public List<Publication> GetPublicationByNome(String nome){
+			// Define query String
+			String jpql = "SELECT r FROM Publication r where r.name=:name";
+			// Create a (typed) query
+			TypedQuery<Publication> typedQuery = em.createQuery(jpql, Publication.class);
+			// Set parameter
+			typedQuery.setParameter("name", nome);
+			// Query and get result
+			List<Publication> mylist = typedQuery.getResultList();
+			return mylist;
 		}
 }
