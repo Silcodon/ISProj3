@@ -24,6 +24,11 @@ public class AsyncReceiver implements MessageListener{
 		this.destination = InitialContext.doLookup("jms/queue/playQueue");
 	}
 	
+	public AsyncReceiver(String destinationQueue) throws NamingException{
+		this.connectionFactory = InitialContext.doLookup("jms/RemoteConnectionFactory");
+		this.destination = InitialContext.doLookup("jms/queue/"+destinationQueue);
+	}
+	
 	
 	@Override
 	public void onMessage(Message msg){
@@ -76,6 +81,10 @@ public class AsyncReceiver implements MessageListener{
 			e.printStackTrace();
 		}
 	}
+	
+	
+	
+	
 	
 	/*
 	public static void main(String[] args) throws NamingException, IOException{

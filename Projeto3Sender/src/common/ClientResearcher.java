@@ -16,11 +16,12 @@ import javax.persistence.TypedQuery;
 import classes.AsyncReceiver;
 import classes.Sender;
 import classes.User;
+import classes.Publication;
 
 public class ClientResearcher {
 	@PersistenceContext(name = "Loader")
 	private EntityManager em;
-	public static void main(String[] args) {
+	public static void main(String[] args) throws NamingException {
 		String username,password;
 	    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 		boolean done  = false;
@@ -36,27 +37,26 @@ public class ClientResearcher {
 			
 			//REGISTER
 			if(option==0) {
-				System.out.println("****************Register JMS****************");
+				/*System.out.println("****************Register JMS****************");
 				System.out.print("Escolha um username: ");
 			    username = scanner.nextLine();  // Read user input
 				System.out.print("Escolha uma password: ");
 				password = scanner.nextLine();  // Read user input
-				System.out.println("\n");
-				User utilizador = new User(username,password);
+				User utilizador = new User(username,password);*/
 				//Enviar msg ao admin para confirmar registo
-				
+				sendmessage("SEND");
 			}
 			
 			//LOGIN
 			if(option==1) {
-				System.out.println("****************Login JMS****************");
+				/*System.out.println("****************Login JMS****************");
 				System.out.print("Username: ");
 			    username = scanner.nextLine();  // Read user input
 				System.out.print("Password: ");
 				password = scanner.nextLine();  // Read user input
-				System.out.println("\n");
+				System.out.println("\n");*/
 				//Enviar msg ao admin para login
-				
+				printresponse();
 				//Após confirmar aceder à app
 			}
 			
@@ -95,10 +95,13 @@ public class ClientResearcher {
 		
 		
 		//MENU DE USER
-		public void appuser() {
+		public void appuser() throws NamingException {
 			boolean done  = false;
 		    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 			String bookname,type,date;
+			
+			Sender playQueue = new Sender();
+			
 			while(!done) {
 				System.out.println("****************JMS App****************");
 				System.out.println("Escolha uma opcao: ");
@@ -115,6 +118,8 @@ public class ClientResearcher {
 				//LIST ALL PUBLICATIONS
 				if(option==0) {
 					//Enviar msg ao admin
+					
+					
 				}
 				
 				
@@ -173,10 +178,13 @@ public class ClientResearcher {
 		
 		
 		//MENU DE ADMIN
-		public void appadmin() {
+		public void appadmin() throws NamingException {
 			boolean done  = false;
 		    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 			String user,bookname;
+			//criar queues
+			
+			
 			while(!done) {
 				System.out.println("****************JMS App****************");
 				System.out.println("Escolha uma opcao: ");
@@ -231,7 +239,7 @@ public class ClientResearcher {
 		}
 		
 		//RECEIVE A MESSAGE
-		public void printresponse() throws NamingException {
+		public static void printresponse() throws NamingException {
 			AsyncReceiver asyncReceiver = new AsyncReceiver();
 			asyncReceiver.launch_and_wait();
 		}
@@ -244,7 +252,7 @@ public class ClientResearcher {
 		
 		
 		//SEND A MESSAGE
-		public void sendmessage(String message) throws NamingException {
+		public static void sendmessage(String message) throws NamingException {
 			Sender sender = new Sender();
 			sender.send(message);
 		}
@@ -265,7 +273,10 @@ public class ClientResearcher {
 		    List<Publication> mylist = typedQuery.getResultList();
 		    return mylist;
 		 }
-		    
+		 
+		
+		
+		
 		//GET PUBS BY NOME	
 		public List<Publication> GetPublicationByNome(String nome){
 			// Define query String

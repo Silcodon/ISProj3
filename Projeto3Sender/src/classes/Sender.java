@@ -1,5 +1,7 @@
 package classes;
 
+import java.util.List;
+
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSConsumer;
@@ -15,7 +17,26 @@ public class Sender {
 	public Sender() throws NamingException{
 		this.connectionFactory = InitialContext.doLookup("jms/RemoteConnectionFactory");
 		this.destination = InitialContext.doLookup("jms/queue/playQueue");
+
+		
 	}
+	/*
+	 * QUEUES 
+	 * 
+	ExpiryQueue
+    DLQ
+    RegistQueue
+    UpdateQueue
+    AddQueue
+    RemoveQueue
+    playQueue
+    
+	 * 
+	 * TOPIC
+	 * 
+    playTopic
+
+	 */
 	
 	public Sender(String destinationQueue) throws NamingException{
 		this.connectionFactory = InitialContext.doLookup("jms/RemoteConnectionFactory");
@@ -50,6 +71,20 @@ public class Sender {
 			re.printStackTrace();
 		}
 		
+	}
+	
+	public List<Publication> getPublications() {
+		List<Publication> aux = null;
+		try (JMSContext context = connectionFactory.createContext("Antonio", "Antoniomaria2");){
+			JMSProducer messageProducer = context.createProducer();
+			messageProducer.send(destination,"getPublications");
+			
+			
+		}
+		catch (Exception re){
+			re.printStackTrace();
+		}
+		return aux;
 	}
 	
 	/*

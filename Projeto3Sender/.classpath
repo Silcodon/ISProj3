@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="C:/wildfly-21.0.0.Final/bin/client/jboss-client.jar"/>
-	<classpathentry kind="lib" path="C:/Users/anton/eclipse-workspace/Projeto2Client/lib/guava-28.1-jre.jar"/>
-	<classpathentry kind="lib" path="/Loader/lib/javax.persistence-api-2.2.jar"/>
-	<classpathentry kind="src" path="/PublicationBeans"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="D:/trabalhos-FCTUC-DEI/---------/z__mei/IS/wildfly-21.0.1.Final/modules/system/layers/base/javax/jms/api/main/jboss-jms-api_2.0_spec-2.0.0.Final.jar"/>
+	<classpathentry kind="lib" path="D:/trabalhos-FCTUC-DEI/---------/z__mei/IS/wildfly-21.0.1.Final/modules/system/layers/base/javax/persistence/api/main/jakarta.persistence-api-2.2.3.jar"/>
+	<classpathentry kind="lib" path="D:/trabalhos-FCTUC-DEI/---------/z__mei/IS/wildfly-21.0.1.Final/bin/client/jboss-client.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
