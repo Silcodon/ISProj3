@@ -22,7 +22,28 @@ import classes.Sender;
 import classes.User;
 import classes.Publication;
 
-public class ClientResearcher {
+public class ClientResearcher extends Thread{
+	@PersistenceContext(name = "Loader")
+	private EntityManager em;
+	public void run() {
+		AsyncReceiver asyncReceiver = null;
+		try {
+			asyncReceiver = new AsyncReceiver();
+		} catch (NamingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		while(true) {
+			
+			try {
+				//asyncReceiver.receive_and_reply();
+				asyncReceiver.give_publications(GetallPubs());
+			} catch (JMSException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}	
+	}
 
 	public static void main(String[] args) throws NamingException {
 		String username,password;
@@ -47,7 +68,7 @@ public class ClientResearcher {
 				password = scanner.nextLine();  // Read user input
 				User utilizador = new User(username,password);*/
 				//Enviar msg ao admin para confirmar registo
-				sendmessage("SEND");
+				appadmin();
 			}
 
 			//LOGIN
@@ -59,8 +80,9 @@ public class ClientResearcher {
 				password = scanner.nextLine();  // Read user input
 				System.out.println("\n");*/
 				//Enviar msg ao admin para login
-				printresponse();
+				
 				//Ap�s confirmar aceder � app
+				appuser();
 			}
 
 			//EXIT
@@ -98,13 +120,14 @@ public class ClientResearcher {
 
 
 		//MENU DE USER
-		public void appuser() throws NamingException {
+		public static void appuser() throws NamingException {
 			boolean done  = false;
 		    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 			String bookname,type,date;
 
 			Sender playQueue = new Sender();
-
+			
+			
 			while(!done) {
 				System.out.println("****************JMS App****************");
 				System.out.println("Escolha uma opcao: ");
@@ -121,8 +144,9 @@ public class ClientResearcher {
 				//LIST ALL PUBLICATIONS
 				if(option==0) {
 					//Enviar msg ao admin
-
-
+					//printallpubs(playQueue.getPublications());
+					//playQueue.send_and_reply("ola");
+					playQueue.getPublications();
 				}
 
 
@@ -183,13 +207,15 @@ public class ClientResearcher {
 
 
 		//MENU DE ADMIN
-		public void appadmin() throws NamingException {
+		public static void appadmin() throws NamingException {
 			boolean done  = false;
 		    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 			String user,bookname;
 			//criar queues
 
-
+			(new ClientResearcher()).start();
+			
+			
 			while(!done) {
 				System.out.println("****************JMS App****************");
 				System.out.println("Escolha uma opcao: ");
@@ -202,10 +228,11 @@ public class ClientResearcher {
 				System.out.println("\n");
 
 				int option = lerInt(0, 6);
-
+				
 				//LIST ALL USERS
 				if(option==0) {
-
+					
+					
 				}
 
 
@@ -249,7 +276,7 @@ public class ClientResearcher {
 
 
 		//RECEIVE A MESSAGE
-		public static void printresponse() throws NamingException {
+		public static void printresponse() throws NamingException, IOException {
 			AsyncReceiver asyncReceiver = new AsyncReceiver();
 			asyncReceiver.launch_and_wait();
 		}
@@ -439,3 +466,8 @@ public class ClientResearcher {
 		}
 
 }
+
+
+
+        
+

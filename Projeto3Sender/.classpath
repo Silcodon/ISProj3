@@ -7,7 +7,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="D:/trabalhos-FCTUC-DEI/---------/z__mei/IS/wildfly-21.0.1.Final/modules/system/layers/base/javax/jms/api/main/jboss-jms-api_2.0_spec-2.0.0.Final.jar"/>
-	<classpathentry kind="lib" path="D:/trabalhos-FCTUC-DEI/---------/z__mei/IS/wildfly-21.0.1.Final/modules/system/layers/base/javax/persistence/api/main/jakarta.persistence-api-2.2.3.jar"/>
+	<classpathentry kind="lib" path="D:/trabalhos-FCTUC-DEI/---------/z__mei/IS/wildfly-21.0.1.Final/modules/system/layers/base/javax/persistence/api/main/jakarta.persistence-api-2.2.3.jar" sourcepath="/Loader/lib/hibernate-core-5.4.22.Final.jar"/>
 	<classpathentry kind="lib" path="D:/trabalhos-FCTUC-DEI/---------/z__mei/IS/wildfly-21.0.1.Final/bin/client/jboss-client.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,15 +1,9 @@
 package classes;
 import java.io.IOException;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.JMSConsumer;
-import javax.jms.JMSContext;
-import javax.jms.JMSException;
-import javax.jms.JMSProducer;
-import javax.jms.JMSRuntimeException;
-import javax.jms.Message;
-import javax.jms.MessageListener;
-import javax.jms.TextMessage;
+import java.io.Serializable;
+import java.util.List;
+
+import javax.jms.*;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -42,14 +36,14 @@ public class AsyncReceiver implements MessageListener{
 	}
 	
 	
-	public void launch_and_wait(){
+	public void launch_and_wait() throws IOException{
 		try (JMSContext context = connectionFactory.createContext("Antonio", "Antoniomaria2");){
 			JMSConsumer consumer = context.createConsumer(destination);
 			consumer.setMessageListener(this);
-			System.out.println("Press enter to finish...");
-			System.in.read();
+			//System.out.println("Press enter to finish...");
+			//System.in.read();
 		}
-		catch (JMSRuntimeException | IOException e){
+		catch (JMSRuntimeException e){
 			e.printStackTrace();
 		}
 	}
@@ -71,11 +65,30 @@ public class AsyncReceiver implements MessageListener{
 			JMSConsumer consumer = context.createConsumer(destination);
 			TextMessage msg = (TextMessage) consumer.receive();
 			System.out.println("Message received:" + msg.getText());
+			
 			JMSProducer producer = context.createProducer();
 			TextMessage reply = context.createTextMessage();
 			reply.setText("Goodbye!");
 			producer.send(msg.getJMSReplyTo(), reply);
 			System.out.println("Sent reply to " + msg.getJMSReplyTo());
+		}
+		catch (JMSRuntimeException e){
+			e.printStackTrace();
+		}
+	}
+	
+	public void give_publications(List<Publication> lista) throws JMSException {
+		try (JMSContext context = connectionFactory.createContext("Antonio", "Antoniomaria2");){
+			JMSConsumer consumer = context.createConsumer(destination);
+			//TextMessage msg = (TextMessage) consumer.receive();
+			System.out.println("Sending publications to user");
+			
+			//enviar lista 
+			JMSProducer producer = context.createProducer();
+			ObjectMessage objmessage = context.createObjectMessage();
+			objmessage.setObject((Serializable) lista);
+			producer.send( destination, objmessage );
+			
 		}
 		catch (JMSRuntimeException e){
 			e.printStackTrace();
