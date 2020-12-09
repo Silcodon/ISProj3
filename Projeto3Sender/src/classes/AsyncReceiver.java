@@ -99,6 +99,7 @@ public class AsyncReceiver implements MessageListener{
 	
 	
 	
+	
 	/*
 	public static void main(String[] args) throws NamingException, IOException{
 		AsyncReceiver asyncReceiver = new AsyncReceiver();
