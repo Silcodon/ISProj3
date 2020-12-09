@@ -15,8 +15,7 @@ import classes.Publication;
 
 public class ActionThread extends Thread{
 	public void run() {
-		EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
-		EntityManager em = emfactory.createEntityManager( );
+		
 		AsyncReceiver asyncReceiver = null;
 		try {
 			asyncReceiver = new AsyncReceiver();
@@ -28,7 +27,7 @@ public class ActionThread extends Thread{
 
 			try {
 				//asyncReceiver.receive_and_reply();
-				asyncReceiver.give_publications(GetallPubs(em));
+				asyncReceiver.give_publications(GetallPubs());
 			} catch (JMSException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -45,7 +44,9 @@ public class ActionThread extends Thread{
 
 	
 	//GET ALL PUBS
-			public static List<Publication> GetallPubs(EntityManager em){
+			public static List<Publication> GetallPubs(){
+				EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
+				EntityManager em = emfactory.createEntityManager( );
 			    // Define query String
 			    String jpql = "SELECT r FROM Publication r";
 			    // Create a (typed) query

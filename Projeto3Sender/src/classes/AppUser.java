@@ -57,5 +57,8 @@ public class AppUser implements Serializable{
 	public void setActivated(boolean activated) {
 		this.activated = activated;
 	}
+	public long getId() {
+		return id;
+	}
 
 }

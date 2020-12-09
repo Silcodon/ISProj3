@@ -96,6 +96,20 @@ public class AsyncReceiver implements MessageListener{
 	}
 	
 	
+	//POR COMPLETAR
+	public void Listen_Notifications(long id) throws NamingException {
+		try (JMSContext context = connectionFactory.createContext("Antonio", "Antoniomaria2");){
+			context.setClientID(String.valueOf(id));
+			JMSConsumer mc = context.createDurableConsumer((Topic) InitialContext.doLookup("jms/topic/playTopic"), "mySubscription");
+			//mc.setMessageListener(this);
+			//System.out.println("Press enter to finish...");
+			//System.in.read();
+		}
+		catch (JMSRuntimeException e){
+			e.printStackTrace();
+		}
+	}
+	
 	
 	
 	
