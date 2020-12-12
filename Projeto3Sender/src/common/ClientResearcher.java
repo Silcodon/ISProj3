@@ -24,34 +24,13 @@ import javax.persistence.TypedQuery;
 import classes.AsyncReceiver;
 import classes.Publication;
 import classes.Sender;
-import classes.User;
+import classes.AppUser;
 
-public class ClientResearcher extends Thread{
-	@PersistenceContext(name = "Loader")
-	private EntityManager em;
-	public void run() {
-		AsyncReceiver asyncReceiver = null;
-		try {
-			asyncReceiver = new AsyncReceiver();
-		} catch (NamingException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		while(true) {
-
-			try {
-				//asyncReceiver.receive_and_reply();
-				asyncReceiver.give_publications(GetallPubs());
-			} catch (JMSException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
+public class ClientResearcher{
 
 	public static void main(String[] args) throws NamingException {
-		String username,password;
-		boolean validusername,validpassword;
+		String AppUsername,password;
+		boolean validAppUsername,validpassword;
 	    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 		boolean done  = false;
 		while(!done) {
@@ -67,18 +46,19 @@ public class ClientResearcher extends Thread{
 			//REGISTER
 			if(option==0) {
 				System.out.println("****************Register JMS****************");
-				System.out.print("Escolha um username: ");
-			    username = scanner.nextLine();  // Read user input
+				System.out.print("Escolha um Username: ");
+			    AppUsername = scanner.nextLine();  // Read AppUser input
 				System.out.print("Escolha uma password: ");
-				password = scanner.nextLine();  // Read user input
+				password = scanner.nextLine();  // Read AppUser input
 				System.out.println("\n");
-				validusername = (username != null) && username.matches("[A-Za-z0-9_]+");
+				validAppUsername = (AppUsername != null) && AppUsername.matches("[A-Za-z0-9_]+");
 				validpassword = (password != null) && password.matches("[A-Za-z0-9_]+");
-				if(validusername==false || validpassword==false) {
-					System.out.println("Please enter a valid username and password");
+				if(validAppUsername==false || validpassword==false) {
+					System.out.println("Please enter a valid Username and password");
+					appadmin();
 				}
 				else {
-					User utilizador = new User(username,password);
+					AppUser utilizador = new AppUser(AppUsername,password);
 					//Enviar msg ao admin para confirmar registo
 				}
 
@@ -87,15 +67,15 @@ public class ClientResearcher extends Thread{
 			//LOGIN
 			if(option==1) {
 				System.out.println("****************Login JMS****************");
-				System.out.print("Username: ");
-			    username = scanner.nextLine();  // Read user input
+				System.out.print("AppUsername: ");
+			    AppUsername = scanner.nextLine();  // Read AppUser input
 				System.out.print("Password: ");
-				password = scanner.nextLine();  // Read user input
+				password = scanner.nextLine();  // Read AppUser input
 				System.out.println("\n");
 				//Enviar msg ao admin para login
 
 				//Ap�s confirmar aceder � app
-				appuser();
+				appAppUser();
 			}
 
 			//EXIT
@@ -132,8 +112,8 @@ public class ClientResearcher extends Thread{
 		}
 
 
-		//MENU DE USER
-		public static void appuser() throws NamingException {
+		//MENU DE AppUser
+		public static void appAppUser() throws NamingException {
 			boolean done  = false;
 		    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 			String bookname,type,date;
@@ -167,7 +147,7 @@ public class ClientResearcher extends Thread{
 				if(option==1) {
 					System.out.println("****************SEARCH JMS****************");
 					System.out.print("Nome da publicacao: ");
-				    bookname = scanner.nextLine();  // Read user input
+				    bookname = scanner.nextLine();  // Read AppUser input
 					System.out.println("\n");
 					//Enviar mensagem a pedir info ao admin
 				}
@@ -176,11 +156,11 @@ public class ClientResearcher extends Thread{
 				if(option==2) {
 					System.out.println("****************ADD JMS****************");
 					System.out.print("Nome da publicacao: ");
-				    bookname = scanner.nextLine();  // Read user input
+				    bookname = scanner.nextLine();  // Read AppUser input
 				    System.out.print("Tipo da publicacao: ");
-				    type = scanner.nextLine();  // Read user input
+				    type = scanner.nextLine();  // Read AppUser input
 				    System.out.print("Data da publicacao (Month Year): ");
-				    date = scanner.nextLine();  // Read user input
+				    date = scanner.nextLine();  // Read AppUser input
 					System.out.println("\n");
 					//Enviar mensagem a pedir info ao admin
 				}
@@ -191,11 +171,11 @@ public class ClientResearcher extends Thread{
 					System.out.print("Nome da publicacao a alterar: ");
 					String booknameold=scanner.nextLine();
 					System.out.print("Novo nome: ");
-				    bookname = scanner.nextLine();  // Read user input
+				    bookname = scanner.nextLine();  // Read AppUser input
 				    System.out.print("Novo tipo: ");
-				    type = scanner.nextLine();  // Read user input
+				    type = scanner.nextLine();  // Read AppUser input
 				    System.out.print("Nova Data (Month Year): ");
-				    date = scanner.nextLine();  // Read user input
+				    date = scanner.nextLine();  // Read AppUser input
 					System.out.println("\n");
 					//Enviar mensagem a pedir info ao admin
 				}
@@ -204,7 +184,7 @@ public class ClientResearcher extends Thread{
 				if(option==4) {
 					System.out.println("****************REMOVE JMS****************");
 					System.out.print("Nome da publicacao: ");
-				    bookname = scanner.nextLine();  // Read user input
+				    bookname = scanner.nextLine();  // Read AppUser input
 					System.out.println("\n");
 					//Enviar mensagem a pedir info ao admin
 				}
@@ -225,18 +205,19 @@ public class ClientResearcher extends Thread{
 		    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 		    ArrayList<String> tasks = new ArrayList<String>();
 		    tasks=ReadFile();
-			String user,bookname;
+			String AppUser,bookname;
 			//criar queues
 
-			(new ClientResearcher()).start();
+			ActionThread thread=new ActionThread();
+			thread.start();
 
 
 			while(!done) {
 				System.out.println("****************JMS App****************");
 				System.out.println("Escolha uma opcao: ");
-				System.out.println("(0) List Users ");
+				System.out.println("(0) List AppUsers ");
 				System.out.println("(1) List Pending Tasks ");
-				System.out.println("(2) Deactivate User ");
+				System.out.println("(2) Deactivate AppUser ");
 				System.out.println("(3) List Publications ");
 				System.out.println("(4) Search Publication ");
 				System.out.println("(5) Logout ");
@@ -244,7 +225,7 @@ public class ClientResearcher extends Thread{
 
 				int option = lerInt(0, 6);
 
-				//LIST ALL USERS
+				//LIST ALL AppUserS
 				if(option==0) {
 
 				}
@@ -261,11 +242,11 @@ public class ClientResearcher extends Thread{
 					}
 				}
 
-				//DEACTIVATE USER
+				//DEACTIVATE AppUser
 				if(option==2) {
 					System.out.println("****************DEACTIVATE JMS****************");
-					System.out.print("Nome do user: ");
-				    user = scanner.nextLine();  // Read user input
+					System.out.print("Nome do AppUser: ");
+				    AppUser = scanner.nextLine();  // Read AppUser input
 					System.out.println("\n");
 				}
 
@@ -278,7 +259,7 @@ public class ClientResearcher extends Thread{
 				if(option==4) {
 					System.out.println("****************SEARCH JMS****************");
 					System.out.print("Nome da publicacao: ");
-				    bookname = scanner.nextLine();  // Read user input
+				    bookname = scanner.nextLine();  // Read AppUser input
 					System.out.println("\n");
 				}
 
@@ -286,6 +267,7 @@ public class ClientResearcher extends Thread{
 				if(option==5) {
 					System.out.println("You have successfully logged out.");
 	                done = true;
+	                thread.interrupt();
 				}
 			}
 		}
@@ -327,16 +309,16 @@ public class ClientResearcher extends Thread{
 
 
 
-		//GET ALL USERS
-		public static List<User> GetallUsers(){
+		//GET ALL AppUserS
+		public static List<AppUser> GetallAppUsers(){
 			EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
 			EntityManager em = emfactory.createEntityManager( );
 		    // Define query String
-		    String jpql = "SELECT u FROM User u";
+		    String jpql = "SELECT u FROM AppUser u";
 		    // Create a (typed) query
-		    TypedQuery<User> typedQuery = em.createQuery(jpql, User.class);
+		    TypedQuery<AppUser> typedQuery = em.createQuery(jpql, AppUser.class);
 		    // Query and get result
-		    List<User> mylist = typedQuery.getResultList();
+		    List<AppUser> mylist = typedQuery.getResultList();
 		    return mylist;
 		 }
 
@@ -368,12 +350,12 @@ public class ClientResearcher extends Thread{
 			return mylist;
 		}
 
-		//ADD USER
-		public void AddUser(User st) {
+		//ADD AppUser
+		public static void AddAppUser(AppUser st) {
 			EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
 			EntityManager entitymanager = emfactory.createEntityManager( );
 			entitymanager.getTransaction( ).begin( );
-			List<User> mylist = GetallUsers();
+			List<AppUser> mylist = GetallAppUsers();
 			if (mylist.size()==0) {
 				st.setAdmin(true);
 			}
@@ -384,7 +366,7 @@ public class ClientResearcher extends Thread{
 		}
 
 		//ADD PUBLICATION
-		public void AddPublication(Publication st) {
+		public static void AddPublication(Publication st) {
 			EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
 			EntityManager entitymanager = emfactory.createEntityManager( );
 			entitymanager.getTransaction( ).begin( );
@@ -395,7 +377,7 @@ public class ClientResearcher extends Thread{
 		}
 
 		//UPDATE PUBLICATION
-		public void UpdatePublication(Publication st, String old) {
+		public static void UpdatePublication(Publication st, String old) {
 			EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
 			EntityManager em = emfactory.createEntityManager( );
 		    em.getTransaction().begin();
@@ -425,7 +407,7 @@ public class ClientResearcher extends Thread{
 		}
 
 		//REMOVE A PUBLICATION
-		public void RemovePublication(String pubname) {
+		public static void RemovePublication(String pubname) {
 			EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
 			EntityManager em = emfactory.createEntityManager( );
 			em.getTransaction().begin();
@@ -436,20 +418,20 @@ public class ClientResearcher extends Thread{
 		    em.close();
 		}
 
-		//ACTIVATE OR DEACTIVATE A USER
-		public void ActivateUser(User st) {
+		//ACTIVATE OR DEACTIVATE A AppUser
+		public void ActivateAppUser(AppUser st) {
 			EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
 			EntityManager em = emfactory.createEntityManager( );
 			em.getTransaction().begin();
 			if(st.isActivated()==false) {
-				Query query = em.createQuery("UPDATE User u SET u.activated = TRUE "
-			            + "WHERE u.username = :Name");
+				Query query = em.createQuery("UPDATE AppUser u SET u.activated = TRUE "
+			            + "WHERE u.AppUsername = :Name");
 			    query.setParameter("Name", st.getUsername());
 			    query.executeUpdate();
 			}
 			else {
-				Query query = em.createQuery("UPDATE User u SET u.activated = FALSE "
-			            + "WHERE u.username = :Name");
+				Query query = em.createQuery("UPDATE AppUser u SET u.activated = FALSE "
+			            + "WHERE u.AppUsername = :Name");
 			    query.setParameter("Name", st.getUsername());
 			    query.executeUpdate();
 			}
@@ -459,30 +441,30 @@ public class ClientResearcher extends Thread{
 		}
 
 		//LOGIN
-		public User login(String username, String password) {
+		public AppUser login(String AppUsername, String password) {
 			EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
 			EntityManager em = emfactory.createEntityManager( );
 			// Define query String
-			String jpql = "SELECT u FROM User u where u.username=:name AND u.password=:pass";
+			String jpql = "SELECT u FROM AppUser u where u.AppUsername=:name AND u.password=:pass";
 			// Create a (typed) query
-			TypedQuery<User> typedQuery = em.createQuery(jpql, User.class);
+			TypedQuery<AppUser> typedQuery = em.createQuery(jpql, AppUser.class);
 			// Set parameter
-			typedQuery.setParameter("name", username);
+			typedQuery.setParameter("name", AppUsername);
 			typedQuery.setParameter("pass", password);
 			// Query and get result
-			List<User> mylist = typedQuery.getResultList();
-			User user=mylist.get(0);
-			return user;
+			List<AppUser> mylist = typedQuery.getResultList();
+			AppUser AppUser=mylist.get(0);
+			return AppUser;
 
 		}
 
 
 //=========================PRINT DATABASE INFO=============================================================
-		//PRINT ALL USERS INFO
-		public static void printallusers() {
-			List<User> mylist = GetallUsers();
+		//PRINT ALL AppUserS INFO
+		public static void printallAppUsers() {
+			List<AppUser> mylist = GetallAppUsers();
 			for(int i=0;i<mylist.size();i++) {
-				System.out.println("Username: " + mylist.get(i).getUsername());
+				System.out.println("AppUsername: " + mylist.get(i).getUsername());
 				System.out.println("Activated: " + String.valueOf(mylist.get(i).isActivated()));
 			}
 			System.out.println("\n");
@@ -547,7 +529,7 @@ public class ClientResearcher extends Thread{
 		}
 
 		//PRINT ALL TASKS
-		public void PrintTasks(ArrayList<String> tasks) {
+		public static void PrintTasks(ArrayList<String> tasks) {
 			for(int i=0;i<tasks.size();i++) {
 				System.out.println("("+(i+1)+") " + tasks.get(i));
 			}
@@ -555,14 +537,14 @@ public class ClientResearcher extends Thread{
 
 		//SELECT A TASK
 		//RETURNS ARRAYLIST WITH DECLINED TASK OR ACCEPTED
-		public ArrayList<String> SelectTask(ArrayList<String> tasks, int choice) {
+		public static ArrayList<String> SelectTask(ArrayList<String> tasks, int choice) {
 		    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 		    boolean done=false;
 			System.out.println("Task selected: " + tasks.get(choice));
 			while(!done) {
 				System.out.println("Do you want to accept or decline?");
 				System.out.println("Type 'exit' to cancel");
-			    String answer = scanner.nextLine();  // Read user input
+			    String answer = scanner.nextLine();  // Read AppUser input
 				if(answer.compareTo("accept")==0) {
 					DoTask(tasks.get(choice));
 					done=true;
@@ -583,19 +565,21 @@ public class ClientResearcher extends Thread{
 
 
 		//PARSE TASK AND EXECUTE
-		public void DoTask(String task) {
+		public static void DoTask(String task) {
 			String[] tokens = task.split(":");
-			//REGISTAR(Registo:Username:Password)
+			//REGISTAR(Registo:AppUsername:Password)
 			if(tokens[0].compareTo("Registo")==0) {
-				User novo= new User(tokens[1],tokens[2]);
-				AddUser(novo);
+				AppUser novo= new AppUser(tokens[1],tokens[2]);
+				AddAppUser(novo);
 				System.out.println("Utilizador " + tokens[1] + " adicionado com sucesso!");
+				//Mandar mensagem de volta ao AppUser
 			}
 			//ADICIONAR(Adicionar:TestePub:Book:March 2013)
 			else if(tokens[0].compareTo("Adicionar")==0) {
 				Publication novo = new Publication(tokens[1],tokens[2],tokens[3]);
 				AddPublication(novo);
 				System.out.println("Publication " + tokens[1] + " adicionada com sucesso!");
+				//Mandar notificacao para todos
 			}
 			//UPDATE(Update:TestePub:TestePubv2:Book:March 2014)
 			else if(tokens[0].compareTo("Update")==0) {
@@ -603,11 +587,13 @@ public class ClientResearcher extends Thread{
 				String oldname=tokens[1];
 				UpdatePublication(updated,oldname);
 				System.out.println("Publication atualizada!");
+				//Mandar notificacao para todos
 			}
 			//REMOVE(Remover:TestePubv2)
 			else if(tokens[0].compareTo("Remover")==0) {
 				RemovePublication(tokens[1]);
-				System.out.println("Publica��o removida!");
+				System.out.println("Publication removida!");
+				//Mandar notificacao para todos
 			}
 			else {
 				System.out.println("Something went wrong with parsing! :(");
