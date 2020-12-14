@@ -33,6 +33,8 @@ public class ClientResearcher{
 		boolean validAppUsername,validpassword;
 	    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 		boolean done  = false;
+		List<AppUser> user2log;
+		Sender playQueue = new Sender();
 		while(!done) {
 			System.out.println("****************JMS****************");
 			System.out.println("Escolha uma opcao: ");
@@ -58,7 +60,7 @@ public class ClientResearcher{
 					appadmin();
 				}
 				else {
-					AppUser utilizador = new AppUser(AppUsername,password);
+					//AppUser utilizador = new AppUser(AppUsername,password);
 					//Enviar msg ao admin para confirmar registo
 				}
 
@@ -73,9 +75,19 @@ public class ClientResearcher{
 				password = scanner.nextLine();  // Read AppUser input
 				System.out.println("\n");
 				//Enviar msg ao admin para login
-
+				user2log = playQueue.login(AppUsername,password);
+				if(user2log.size()==0) {
+					System.out.println("Username ou password incorretos");
+					
+				}
+				
+				if(!user2log.get(0).isAdmin()){
+					appAppUser(/* passar aqui o user*/);
+				}else {
+					appadmin(/* passar aqui o user*/);
+				}
 				//Apï¿½s confirmar aceder ï¿½ app
-				appAppUser();
+				
 			}
 
 			//EXIT
@@ -120,7 +132,7 @@ public class ClientResearcher{
 
 			Sender playQueue = new Sender();
 
-
+			List<Publication> aux = null;
 			while(!done) {
 				System.out.println("****************JMS App****************");
 				System.out.println("Escolha uma opcao: ");
@@ -139,7 +151,9 @@ public class ClientResearcher{
 					//Enviar msg ao admin
 					//printallpubs(playQueue.getPublications());
 					//playQueue.send_and_reply("ola");
-					playQueue.getPublications();
+					
+					printallpubs(playQueue.getPublications());
+					
 				}
 
 
@@ -149,7 +163,13 @@ public class ClientResearcher{
 					System.out.print("Nome da publicacao: ");
 				    bookname = scanner.nextLine();  // Read AppUser input
 					System.out.println("\n");
-					//Enviar mensagem a pedir info ao admin
+					aux =playQueue.getPublicationByTitle(bookname);
+					if(aux.size()>=1) {
+						printallpubs(aux);
+					}else {
+						System.out.println("Não existe essa publicação na base de dados");
+					}
+					
 				}
 
 				//ADD PUBLICATION
