@@ -2,6 +2,13 @@ package classes;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.jms.*;
 import javax.naming.InitialContext;
@@ -65,11 +72,12 @@ public class AsyncReceiver implements MessageListener{
 		}
 	}
 	
+	
 	public String receive(){
 		String msg = null;
 		try (JMSContext context = connectionFactory.createContext("Antonio", "Antoniomaria2");){
 			JMSConsumer mc = context.createConsumer(destination);
-			msg = mc.receiveBody(String.class);
+			msg = mc.receiveBody(String.class,1000);
 		}
 		catch (JMSRuntimeException re){
 			re.printStackTrace();
@@ -307,7 +315,7 @@ public class AsyncReceiver implements MessageListener{
 					EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
 					EntityManager em = emfactory.createEntityManager( );
 					// Define query String
-					String jpql = "SELECT u FROM AppUser u where u.AppUsername=:name AND u.password=:pass";
+					String jpql = "SELECT u FROM AppUser u where u.username=:name AND u.password=:pass";
 					// Create a (typed) query
 					TypedQuery<AppUser> typedQuery = em.createQuery(jpql, AppUser.class);
 					// Set parameter

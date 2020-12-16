@@ -57,11 +57,13 @@ public class ClientResearcher{
 				validpassword = (password != null) && password.matches("[A-Za-z0-9_]+");
 				if(validAppUsername==false || validpassword==false) {
 					System.out.println("Please enter a valid Username and password");
-					appadmin();
 				}
 				else {
 					//AppUser utilizador = new AppUser(AppUsername,password);
 					//Enviar msg ao admin para confirmar registo
+					Sender sender = new Sender("AddQueue");
+					sender.send("Registo:"+AppUsername+":"+password);
+					System.out.println("Aguarde pela confirmacao do admin para efetuar login!");
 				}
 
 			}
@@ -84,7 +86,7 @@ public class ClientResearcher{
 				if(!user2log.get(0).isAdmin()){
 					appAppUser(/* passar aqui o user*/);
 				}else {
-					appadmin(/* passar aqui o user*/);
+					new ClientAdmin();
 				}
 				//Ap�s confirmar aceder � app
 				
@@ -219,78 +221,7 @@ public class ClientResearcher{
 
 
 
-		//MENU DE ADMIN
-		public static void appadmin() throws NamingException {
-			boolean done  = false;
-		    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
-		    ArrayList<String> tasks = new ArrayList<String>();
-		    tasks=ReadFile();
-			String AppUser,bookname;
-			//criar queues
-
-			ActionThread thread=new ActionThread();
-			thread.start();
-
-
-			while(!done) {
-				System.out.println("****************JMS App****************");
-				System.out.println("Escolha uma opcao: ");
-				System.out.println("(0) List AppUsers ");
-				System.out.println("(1) List Pending Tasks ");
-				System.out.println("(2) Deactivate AppUser ");
-				System.out.println("(3) List Publications ");
-				System.out.println("(4) Search Publication ");
-				System.out.println("(5) Logout ");
-				System.out.println("\n");
-
-				int option = lerInt(0, 6);
-
-				//LIST ALL AppUserS
-				if(option==0) {
-
-				}
-
-
-				//LIST PENDING TASKS
-				if(option==1) {
-					System.out.println("****************TASKS JMS****************");
-					PrintTasks(tasks);
-					System.out.print("Choose a pending task (Type 0 to exit): ");
-					int option2=lerInt(0,tasks.size()+1);
-					if(option2!=0) {
-						SelectTask(tasks,option2-1);
-					}
-				}
-
-				//DEACTIVATE AppUser
-				if(option==2) {
-					System.out.println("****************DEACTIVATE JMS****************");
-					System.out.print("Nome do AppUser: ");
-				    AppUser = scanner.nextLine();  // Read AppUser input
-					System.out.println("\n");
-				}
-
-				//LIST PUBLICATIONS
-				if(option==3) {
-
-				}
-
-				//SEARCH PUBLICATION
-				if(option==4) {
-					System.out.println("****************SEARCH JMS****************");
-					System.out.print("Nome da publicacao: ");
-				    bookname = scanner.nextLine();  // Read AppUser input
-					System.out.println("\n");
-				}
-
-				//EXIT
-				if(option==5) {
-					System.out.println("You have successfully logged out.");
-	                done = true;
-	                thread.interrupt();
-				}
-			}
-		}
+		
 
 
 
@@ -341,6 +272,21 @@ public class ClientResearcher{
 		    List<AppUser> mylist = typedQuery.getResultList();
 		    return mylist;
 		 }
+		
+		//GET AppUser By name
+		public static List<AppUser> GetAppUser(String nome){
+			EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
+			EntityManager em = emfactory.createEntityManager( );
+		    // Define query String
+		    String jpql = "SELECT u FROM AppUser u where u.username=:name";
+		    // Create a (typed) query
+		    TypedQuery<AppUser> typedQuery = em.createQuery(jpql, AppUser.class);
+		    // Set parameter
+		 	typedQuery.setParameter("name", nome);
+		    // Query and get result
+		    List<AppUser> mylist = typedQuery.getResultList();
+		    return mylist;
+		 }
 
 		//GET ALL PUBS
 		public static List<Publication> GetallPubs(){
@@ -356,7 +302,7 @@ public class ClientResearcher{
 		 }
 
 		//GET PUBS BY NOME
-		public List<Publication> GetPublicationByNome(String nome){
+		public static List<Publication> GetPublicationByNome(String nome){
 			EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
 			EntityManager em = emfactory.createEntityManager( );
 			// Define query String
@@ -439,7 +385,7 @@ public class ClientResearcher{
 		}
 
 		//ACTIVATE OR DEACTIVATE A AppUser
-		public void ActivateAppUser(AppUser st) {
+		public static void ActivateAppUser(AppUser st) {
 			EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
 			EntityManager em = emfactory.createEntityManager( );
 			em.getTransaction().begin();
@@ -461,11 +407,11 @@ public class ClientResearcher{
 		}
 
 		//LOGIN
-		public AppUser login(String AppUsername, String password) {
+		public List<AppUser> login(String AppUsername, String password) {
 			EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
 			EntityManager em = emfactory.createEntityManager( );
 			// Define query String
-			String jpql = "SELECT u FROM AppUser u where u.AppUsername=:name AND u.password=:pass";
+			String jpql = "SELECT u FROM AppUser u where u.username=:name AND u.password=:pass";
 			// Create a (typed) query
 			TypedQuery<AppUser> typedQuery = em.createQuery(jpql, AppUser.class);
 			// Set parameter
@@ -473,8 +419,8 @@ public class ClientResearcher{
 			typedQuery.setParameter("pass", password);
 			// Query and get result
 			List<AppUser> mylist = typedQuery.getResultList();
-			AppUser AppUser=mylist.get(0);
-			return AppUser;
+			return mylist;
+			
 
 		}
 
@@ -484,10 +430,12 @@ public class ClientResearcher{
 		public static void printallAppUsers() {
 			List<AppUser> mylist = GetallAppUsers();
 			for(int i=0;i<mylist.size();i++) {
+				System.out.println("Utilizador " + (i+1) +":");
 				System.out.println("AppUsername: " + mylist.get(i).getUsername());
 				System.out.println("Activated: " + String.valueOf(mylist.get(i).isActivated()));
+				System.out.println("\n");
 			}
-			System.out.println("\n");
+			System.out.println("\n\n");
 		}
 
 		//PRINT ALL PUBS INFO
