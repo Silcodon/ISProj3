@@ -387,7 +387,8 @@ public class ClientAdmin {
 			//PRINT ALL TASKS
 			public static void PrintTasks(ArrayList<String> tasks) {
 				for(int i=0;i<tasks.size();i++) {
-					System.out.println("("+(i+1)+") " + tasks.get(i));
+					String[] tokens = tasks.get(i).split(":");
+					System.out.println("("+(i+1)+") " + tokens[0] + ": " + tokens[1]);
 				}
 			}
 

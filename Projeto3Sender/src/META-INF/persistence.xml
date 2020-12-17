@@ -8,7 +8,7 @@ xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org
 		<class>classes.Institution</class>
 		<class>classes.Researcher</class>
 		<class>classes.Publication</class>
-		<class>classes.User</class>
+		<class>classes.AppUser</class>
 		<class>classes.Skill</class>
 		<properties>
 			<property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />

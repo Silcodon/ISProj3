@@ -78,17 +78,19 @@ public class ClientResearcher{
 				System.out.println("\n");
 				//Enviar msg ao admin para login
 				user2log = playQueue.login(AppUsername,password);
-				if(user2log.size()==0) {
-					System.out.println("Username ou password incorretos");
+				if(user2log!=null) {
+					if(user2log.size()==0) {
+						System.out.println("Username ou password incorretos");
+						
+					}
 					
+					if(!user2log.get(0).isAdmin()){
+						appAppUser(/* passar aqui o user*/);
+					}else {
+						new ClientAdmin();
+					}
 				}
 				
-				if(!user2log.get(0).isAdmin()){
-					appAppUser(/* passar aqui o user*/);
-				}else {
-					new ClientAdmin();
-				}
-				//Ap�s confirmar aceder � app
 				
 			}
 
@@ -185,6 +187,9 @@ public class ClientResearcher{
 				    date = scanner.nextLine();  // Read AppUser input
 					System.out.println("\n");
 					//Enviar mensagem a pedir info ao admin
+					//Adicionar:TestePub:Book:March 2013
+					Sender sender = new Sender("AddQueue");
+					sender.send("Adicionar:"+bookname+":"+type+":"+date);
 				}
 
 				//UPDATE PUBLICATION
@@ -200,6 +205,9 @@ public class ClientResearcher{
 				    date = scanner.nextLine();  // Read AppUser input
 					System.out.println("\n");
 					//Enviar mensagem a pedir info ao admin
+					//Update:TestePub:TestePubv2:Book:March 2014
+					Sender sender = new Sender("AddQueue");
+					sender.send("Update:"+booknameold+":"+bookname+":"+type+":"+date);
 				}
 
 				//REMOVE PUBLICATION
@@ -209,6 +217,9 @@ public class ClientResearcher{
 				    bookname = scanner.nextLine();  // Read AppUser input
 					System.out.println("\n");
 					//Enviar mensagem a pedir info ao admin
+					//Remover:TestePubv2
+					Sender sender = new Sender("AddQueue");
+					sender.send("Remover:"+bookname);
 				}
 
 				//EXIT

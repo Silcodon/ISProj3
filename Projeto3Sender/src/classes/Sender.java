@@ -14,9 +14,11 @@ import javax.persistence.TypedQuery;
 public class Sender {
 	private ConnectionFactory connectionFactory;
 	private Destination destination;
+	private final int timeout;
 	public Sender() throws NamingException{
 		this.connectionFactory = InitialContext.doLookup("jms/RemoteConnectionFactory");
 		this.destination = InitialContext.doLookup("jms/queue/playQueue");
+		this.timeout=2000;
 
 		
 	}
@@ -41,6 +43,7 @@ public class Sender {
 	public Sender(String destinationQueue) throws NamingException{
 		this.connectionFactory = InitialContext.doLookup("jms/RemoteConnectionFactory");
 		this.destination = InitialContext.doLookup("jms/queue/" + destinationQueue);
+		this.timeout=2000;
 	}
 	
 	
@@ -84,13 +87,13 @@ public class Sender {
 			messageProducer.send(destination,msg);
 			
 			JMSConsumer cons = context.createConsumer(tmp);
-			ObjectMessage objmsg = (ObjectMessage) cons.receive();
+			ObjectMessage objmsg = (ObjectMessage) cons.receive(timeout);
 			aux= (List<Publication>) objmsg.getObject();
 			System.out.println("I received the reply sent to the temporary queue: "  );
 			
 		}
 		catch (Exception re){
-			re.printStackTrace();
+			System.out.println("Nenhum admin ativo! Tente novamente mais tarde");
 		}
 		return aux;
 	}
@@ -105,13 +108,13 @@ public class Sender {
 			messageProducer.send(destination,msg);
 			
 			JMSConsumer cons = context.createConsumer(tmp);
-			ObjectMessage objmsg = (ObjectMessage) cons.receive();
+			ObjectMessage objmsg = (ObjectMessage) cons.receive(timeout);
 			aux= (List<Publication>) objmsg.getObject();
 			System.out.println("Mensagem recebida: "  );
 			
 		}
 		catch (Exception re){
-			re.printStackTrace();
+			System.out.println("Nenhum admin ativo! Tente novamente mais tarde");
 		}
 		return aux;
 	}
@@ -127,7 +130,7 @@ public class Sender {
 			messageProducer.send(destination,msg);
 			
 			JMSConsumer cons = context.createConsumer(tmp);
-			ObjectMessage objmsg = (ObjectMessage) cons.receive();
+			ObjectMessage objmsg = (ObjectMessage) cons.receive(timeout);
 			aux= (List<AppUser>) objmsg.getObject();
 			System.out.println("Mensagem recebida: "  );
 			
@@ -135,7 +138,7 @@ public class Sender {
 			
 		}
 		catch (Exception re){
-			re.printStackTrace();
+			System.out.println("Nenhum admin ativo! Tente novamente mais tarde");
 		}
 		return aux;
 	}
