@@ -32,7 +32,7 @@ public class AsyncReceiver implements MessageListener{
 	
 	public AsyncReceiver(String destinationQueue) throws NamingException{
 		this.connectionFactory = InitialContext.doLookup("jms/RemoteConnectionFactory");
-		this.destination = InitialContext.doLookup("jms/"+destinationQueue);
+		this.destination = InitialContext.doLookup("jms/queue/"+destinationQueue);
 	}
 	
 	
@@ -42,7 +42,7 @@ public class AsyncReceiver implements MessageListener{
 		try{
 			
 			
-			System.out.println("\n Got message: " + textMsg.getText());
+			System.out.println("Got message: " + textMsg.getText());
 			if(textMsg.getText().equals("getPublications")) {
 				
 				give_publications(textMsg);
@@ -56,20 +56,7 @@ public class AsyncReceiver implements MessageListener{
 			e.printStackTrace();
 		}
 	}
-	public void noti(String user) throws JMSException {
-		try (JMSContext context = connectionFactory.createContext("Antonio", "Antoniomaria2");){
-			context.setClientID(user);
-			JMSConsumer mc = context.createDurableConsumer((Topic) destination, "Subscription='"+ user+"'");
-			mc.setMessageListener(this);
-			//System.out.println("Press enter to finish...");
-			//System.in.read();
-																																																																																																																while(true) {	
-																																																																																																																							}
-		}
-		catch (JMSRuntimeException e){
-			e.printStackTrace();
-		}
-	}
+	
 	
 	public void launch_and_wait() throws IOException{
 		try (JMSContext context = connectionFactory.createContext("Antonio", "Antoniomaria2");){

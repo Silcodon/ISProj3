@@ -42,20 +42,10 @@ public class Sender {
 	
 	public Sender(String destinationQueue) throws NamingException{
 		this.connectionFactory = InitialContext.doLookup("jms/RemoteConnectionFactory");
-		this.destination = InitialContext.doLookup("jms/" + destinationQueue);
-		this.timeout=7000;
+		this.destination = InitialContext.doLookup("jms/queue/" + destinationQueue);
+		this.timeout=2000;
 	}
-	public void note_ALL(String text) {
-		
-		try (JMSContext context = connectionFactory.createContext("Antonio", "Antoniomaria2");){
-			JMSProducer messageProducer = context.createProducer();
-			
-			messageProducer.send(destination, text);
-	}
-	catch (Exception re){
-		re.printStackTrace();
-	}
-	}
+	
 	
 	public void send(String text){
 		try (JMSContext context = connectionFactory.createContext("Antonio", "Antoniomaria2");){

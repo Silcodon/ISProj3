@@ -28,13 +28,15 @@ import classes.AppUser;
 
 public class ClientResearcher{
 
-	public static void main(String[] args) throws NamingException {
+	public static void main(String[] args) throws NamingException, InterruptedException {
 		String AppUsername,password;
 		boolean validAppUsername,validpassword;
 	    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 		boolean done  = false;
 		List<AppUser> user2log;
 		Sender playQueue = new Sender();
+		
+		
 		while(!done) {
 			System.out.println("****************JMS****************");
 			System.out.println("Escolha uma opcao: ");
@@ -61,7 +63,7 @@ public class ClientResearcher{
 				else {
 					//AppUser utilizador = new AppUser(AppUsername,password);
 					//Enviar msg ao admin para confirmar registo
-					Sender sender = new Sender("AddQueue");
+					Sender sender = new Sender("queue/AddQueue");
 					sender.send("Registo:"+AppUsername+":"+password);
 					System.out.println("Aguarde pela confirmacao do admin para efetuar login!");
 				}
@@ -78,6 +80,7 @@ public class ClientResearcher{
 				System.out.println("\n");
 				//Enviar msg ao admin para login
 				user2log = playQueue.login(AppUsername,password);
+				
 				if(user2log!=null) {
 					if(user2log.size()==0) {
 						System.out.println("Username ou password incorretos");
@@ -85,9 +88,13 @@ public class ClientResearcher{
 					}
 					
 					if(!user2log.get(0).isAdmin()){
-						appAppUser(/* passar aqui o user*/);
+						
+						appAppUser(AppUsername);
 					}else {
-						new ClientAdmin();
+						
+						//System.out.println("olha um admin");
+						//new ClientAdmin();
+						
 					}
 				}
 				
@@ -129,13 +136,14 @@ public class ClientResearcher{
 
 
 		//MENU DE AppUser
-		public static void appAppUser() throws NamingException {
+		public static void appAppUser(String username) throws NamingException, InterruptedException {
 			boolean done  = false;
 		    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 			String bookname,type,date;
 
 			Sender playQueue = new Sender();
-
+			NotThread thread=new NotThread(username);
+			thread.start();
 			List<Publication> aux = null;
 			while(!done) {
 				System.out.println("****************JMS App****************");
@@ -188,7 +196,7 @@ public class ClientResearcher{
 					System.out.println("\n");
 					//Enviar mensagem a pedir info ao admin
 					//Adicionar:TestePub:Book:March 2013
-					Sender sender = new Sender("AddQueue");
+					Sender sender = new Sender("queue/AddQueue");
 					sender.send("Adicionar:"+bookname+":"+type+":"+date);
 				}
 
@@ -206,7 +214,7 @@ public class ClientResearcher{
 					System.out.println("\n");
 					//Enviar mensagem a pedir info ao admin
 					//Update:TestePub:TestePubv2:Book:March 2014
-					Sender sender = new Sender("AddQueue");
+					Sender sender = new Sender("queue/AddQueue");
 					sender.send("Update:"+booknameold+":"+bookname+":"+type+":"+date);
 				}
 
@@ -218,7 +226,7 @@ public class ClientResearcher{
 					System.out.println("\n");
 					//Enviar mensagem a pedir info ao admin
 					//Remover:TestePubv2
-					Sender sender = new Sender("AddQueue");
+					Sender sender = new Sender("queue/AddQueue");
 					sender.send("Remover:"+bookname);
 				}
 
@@ -226,6 +234,7 @@ public class ClientResearcher{
 				if(option==5) {
 					System.out.println("You have successfully logged out.");
 	                done = true;
+	                thread.join();
 				}
 			}
 		}

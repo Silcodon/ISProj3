@@ -57,7 +57,7 @@ public class ClientAdmin {
 					//LIST PENDING TASKS
 					if(option==1) {
 						String task="";
-						AsyncReceiver asyncReceiver = new AsyncReceiver("AddQueue");
+						AsyncReceiver asyncReceiver = new AsyncReceiver("queue/AddQueue");
 						while (task!=null) {
 							task = asyncReceiver.receive();
 							if(task!=null) {
@@ -76,7 +76,7 @@ public class ClientAdmin {
 						}
 						//Se não fizer nada voltar a mandar para a queue para não se perderem e outro admin puder executa-las
 						for(int j=0;j<tasks.size();j++) {
-							Sender sender=new Sender("AddQueue");
+							Sender sender=new Sender("queue/AddQueue");
 							sender.send(tasks.get(j));
 						}
 						tasks.clear();
@@ -234,24 +234,25 @@ public class ClientAdmin {
 				EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
 				EntityManager em = emfactory.createEntityManager( );
 			    em.getTransaction().begin();
-			    if(st.getName().compareTo("")!=0) {
-			    	Query query = em.createQuery("UPDATE Publication p SET p.name =: nome"
-				            + "WHERE p.name = :oldname");
-			    	query.setParameter("nome", st.getName());
-				    query.setParameter("oldname", old);
-				    query.executeUpdate();
-			    }
+			    
 			    if(st.getType().compareTo("")!=0) {
 			    	Query query = em.createQuery("UPDATE Publication p SET p.type =: tipo "
-				            + "WHERE p.name = :oldname");
+				            + "WHERE p.name =: oldname");
 			    	query.setParameter("tipo", st.getType());
 				    query.setParameter("oldname", old);
 				    query.executeUpdate();
 			    }
 			    if(st.getDate().compareTo("")!=0) {
 			    	Query query = em.createQuery("UPDATE Publication p SET p.date =: data "
-				            + "WHERE p.name = :oldname");
+				            + "WHERE p.name =: oldname");
 			    	query.setParameter("data", st.getDate());
+				    query.setParameter("oldname", old);
+				    query.executeUpdate();
+			    }
+			    if(st.getName().compareTo("")!=0) {
+			    	Query query = em.createQuery("UPDATE Publication p SET p.name =: nome "
+				            + "WHERE p.name =: oldname");
+			    	query.setParameter("nome", st.getName());
 				    query.setParameter("oldname", old);
 				    query.executeUpdate();
 			    }
@@ -394,16 +395,26 @@ public class ClientAdmin {
 
 			//SELECT A TASK
 			//RETURNS ARRAYLIST WITH DECLINED TASK OR ACCEPTED
-			public static ArrayList<String> SelectTask(ArrayList<String> tasks, int choice) {
+			public static ArrayList<String> SelectTask(ArrayList<String> tasks, int choice) throws NamingException {
 			    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 			    boolean done=false;
+			    Sender a = null;
 				System.out.println("Task selected: " + tasks.get(choice));
 				while(!done) {
 					System.out.println("Do you want to accept or decline?");
 					System.out.println("Type 'exit' to cancel");
 				    String answer = scanner.nextLine();  // Read AppUser input
 					if(answer.compareTo("accept")==0) {
+						a = new Sender("topic/playTopic");
 						DoTask(tasks.get(choice));
+						
+						
+						if(tasks.get(choice).startsWith("Registo")) {
+							a.note_ALL("USER REGISTADO");
+						}else {
+							a.note_ALL( tasks.get(choice) + " ACEITE PELO ADMIN!\n");
+						}
+						tasks.remove(choice);
 						done=true;
 					}
 					else if(answer.compareTo("decline")==0) {
