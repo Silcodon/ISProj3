@@ -73,9 +73,10 @@ public class ClientAdmin {
 						if(option2!=0) {
 							SelectTask(tasks,option2-1);
 						}
+
+						Sender sender=new Sender("queue/AddQueue");
 						//Se não fizer nada voltar a mandar para a queue para não se perderem e outro admin puder executa-las
 						for(int j=0;j<tasks.size();j++) {
-							Sender sender=new Sender("queue/AddQueue");
 							sender.send(tasks.get(j));
 						}
 						tasks.clear();
@@ -88,8 +89,8 @@ public class ClientAdmin {
 						System.out.print("Nome do AppUser: ");
 					    AppUser = scanner.nextLine();  // Read AppUser input
 						System.out.println("\n");
-						ActivateAppUser(GetAppUser(AppUser).get(0));
-						System.out.println("O User foi desativado!");
+						String status = ActivateAppUser(GetAppUser(AppUser).get(0));
+						System.out.println("O User foi "+ status +"!");
 					}
 
 					//LIST PUBLICATIONS
@@ -271,7 +272,8 @@ public class ClientAdmin {
 			}
 
 			//ACTIVATE OR DEACTIVATE A AppUser
-			public static void ActivateAppUser(AppUser st) {
+			public static String ActivateAppUser(AppUser st) {
+				String returnar = null;
 				EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
 				EntityManager em = emfactory.createEntityManager( );
 				em.getTransaction().begin();
@@ -280,16 +282,19 @@ public class ClientAdmin {
 				            + "WHERE u.AppUsername = :Name");
 				    query.setParameter("Name", st.getUsername());
 				    query.executeUpdate();
+				    returnar="ativado";
 				}
 				else {
 					Query query = em.createQuery("UPDATE AppUser u SET u.activated = FALSE "
 				            + "WHERE u.AppUsername = :Name");
 				    query.setParameter("Name", st.getUsername());
 				    query.executeUpdate();
+				    returnar="desativado";
 				}
 
 			    em.getTransaction().commit();
 			    em.close();
+			    return returnar;
 			}
 
 			//LOGIN
