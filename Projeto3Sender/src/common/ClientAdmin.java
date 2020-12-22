@@ -31,8 +31,7 @@ public class ClientAdmin {
 				String AppUser,bookname;
 				//criar queues
 
-				ActionThread thread=new ActionThread();
-				thread.start();
+				
 
 
 				while(!done) {
@@ -111,7 +110,6 @@ public class ClientAdmin {
 					if(option==5) {
 						System.out.println("You have successfully logged out.");
 		                done = true;
-		                thread.interrupt();
 					}
 				}
 			}
