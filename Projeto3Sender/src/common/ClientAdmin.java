@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import javax.ejb.EJB;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -22,12 +23,12 @@ import classes.Publication;
 import classes.Sender;
 
 public class ClientAdmin {
+	
 	//MENU DE ADMIN
 			public static void main(String[] args) throws NamingException {
 				boolean done  = false;
 			    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 			    ArrayList<String> tasks = new ArrayList<String>();
-			    tasks=ReadFile();
 				String AppUser,bookname;
 				//criar queues
 
@@ -86,11 +87,13 @@ public class ClientAdmin {
 					//DEACTIVATE AppUser
 					if(option==2) {
 						System.out.println("****************DEACTIVATE JMS****************");
-						System.out.print("Nome do AppUser: ");
+						System.out.print("Nome do AppUser (Type nothing to exit): ");
 					    AppUser = scanner.nextLine();  // Read AppUser input
 						System.out.println("\n");
-						String status = ActivateAppUser(GetAppUser(AppUser).get(0));
-						System.out.println("O User foi "+ status +"!");
+					    if(!AppUser.equals("")) {
+					    	String status = ActivateAppUser(GetAppUser(AppUser).get(0));
+							System.out.println("O User foi "+ status +"!");
+					    }
 					}
 
 					//LIST PUBLICATIONS
@@ -101,10 +104,12 @@ public class ClientAdmin {
 					//SEARCH PUBLICATION
 					if(option==4) {
 						System.out.println("****************SEARCH JMS****************");
-						System.out.print("Nome da publicacao: ");
+						System.out.print("Nome da publicacao (Type nothing to exit): ");
 					    bookname = scanner.nextLine();  // Read AppUser input
 						System.out.println("\n");
-						printallpubs(GetPublicationByNome(bookname));
+						if(!bookname.equals("")) {
+							printallpubs(GetPublicationByNome(bookname));	
+						}
 					}
 
 					//EXIT
@@ -279,14 +284,14 @@ public class ClientAdmin {
 				em.getTransaction().begin();
 				if(st.isActivated()==false) {
 					Query query = em.createQuery("UPDATE AppUser u SET u.activated = TRUE "
-				            + "WHERE u.AppUsername = :Name");
+				            + "WHERE u.username = :Name");
 				    query.setParameter("Name", st.getUsername());
 				    query.executeUpdate();
 				    returnar="ativado";
 				}
 				else {
 					Query query = em.createQuery("UPDATE AppUser u SET u.activated = FALSE "
-				            + "WHERE u.AppUsername = :Name");
+				            + "WHERE u.username = :Name");
 				    query.setParameter("Name", st.getUsername());
 				    query.executeUpdate();
 				    returnar="desativado";
@@ -297,23 +302,7 @@ public class ClientAdmin {
 			    return returnar;
 			}
 
-			//LOGIN
-			public List<AppUser> login(String AppUsername, String password) {
-				EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
-				EntityManager em = emfactory.createEntityManager( );
-				// Define query String
-				String jpql = "SELECT u FROM AppUser u where u.username=:name AND u.password=:pass";
-				// Create a (typed) query
-				TypedQuery<AppUser> typedQuery = em.createQuery(jpql, AppUser.class);
-				// Set parameter
-				typedQuery.setParameter("name", AppUsername);
-				typedQuery.setParameter("pass", password);
-				// Query and get result
-				List<AppUser> mylist = typedQuery.getResultList();
-				return mylist;
-				
-
-			}
+			
 
 
 	//=========================PRINT DATABASE INFO=============================================================
@@ -344,49 +333,9 @@ public class ClientAdmin {
 
 
 	//=========================PENDING TASKS AUX=================================================================
-			//READ PENDING TASKS FROM FILE
-			public static ArrayList<String> ReadFile() {
-				ArrayList<String> tasks = new ArrayList<String>();
-				try {
-					File myObj = new File("Tasks.txt");
-					Scanner myReader = new Scanner(myObj);
-					while (myReader.hasNextLine()) {
-						String data = myReader.nextLine();
-						tasks.add(data);
-					}
-					myReader.close();
-			    	} catch (FileNotFoundException e) {
-			    		return tasks;
-			    	}
-				return tasks;
-			 }
+			
 
-
-			//WRITE PENDING TASKS TO FILE
-			public void WriteFile(ArrayList<String> tasks) {
-				//CREATE IF IT DOESNT EXIST
-				try {
-					File myObj = new File("Tasks.txt");
-				    myObj.createNewFile();
-				} catch (IOException e) {
-					 System.out.println("An error occurred.");
-				     e.printStackTrace();
-				}
-				//WRITE TO FILE
-				try {
-					BufferedWriter outputWriter = null;
-					outputWriter = new BufferedWriter(new FileWriter("Tasks.txt"));
-					for(int i=0;i<tasks.size();i++) {
-						outputWriter.write(tasks.get(i));
-						outputWriter.newLine();
-					}
-					outputWriter.flush();
-					outputWriter.close();
-				} catch (IOException e) {
-					System.out.println("An error occurred.");
-					e.printStackTrace();
-				}
-			}
+			
 
 			//PRINT ALL TASKS
 			public static void PrintTasks(ArrayList<String> tasks) {

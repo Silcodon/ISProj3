@@ -152,6 +152,31 @@ public class Sender {
 		}
 		return aux;
 	}
+	
+	
+	
+	public boolean Verificaativo(String user, String pass) {
+		List<AppUser> aux = null;
+		try (JMSContext context = connectionFactory.createContext("Antonio", "Antoniomaria2");){
+			JMSProducer messageProducer = context.createProducer();
+			TextMessage msg = context.createTextMessage();
+			Destination tmp = context.createTemporaryQueue();
+			msg.setJMSReplyTo(tmp);
+			msg.setText("Login:"+user+":"+pass);
+			messageProducer.send(destination,msg);
+			
+			JMSConsumer cons = context.createConsumer(tmp);
+			ObjectMessage objmsg = (ObjectMessage) cons.receive(timeout);
+			aux= (List<AppUser>) objmsg.getObject();
+			
+			
+			
+		}
+		catch (Exception re){
+			System.out.println("Nenhum admin ativo! Tente novamente mais tarde");
+		}
+		return aux.get(0).isActivated();
+	}
 	/*
 	 public static void main(String[] args) throws NamingException{
 		Sender sender = new Sender();
