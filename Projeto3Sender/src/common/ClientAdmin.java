@@ -7,9 +7,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Scanner;
 
 import javax.ejb.EJB;
+import javax.naming.Context;
+import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -21,6 +24,7 @@ import classes.AppUser;
 import classes.AsyncReceiver;
 import classes.Publication;
 import classes.Sender;
+import main.actionbeanRemote;
 
 public class ClientAdmin {
 	
@@ -30,8 +34,30 @@ public class ClientAdmin {
 			    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 			    ArrayList<String> tasks = new ArrayList<String>();
 				String AppUser,bookname;
+				actionbeanRemote ejb = null;
 				//criar queues
+				Context context;
+				Properties jndiProperties = new Properties();
 
+				jndiProperties.setProperty("java.naming.factory.initial", "org.jboss.naming.remote.client.InitialContextFactory");
+
+				jndiProperties.setProperty("java.naming.provider.url","http-remoting://localhost:8080");
+
+				jndiProperties.setProperty("jboss.naming.client.ejb.context","true");
+				
+				try {
+					
+					context=new InitialContext(jndiProperties);
+					ejb = (actionbeanRemote) context.lookup("Projeto3Beans/actionbean!main.actionbeanRemote");
+					
+			    	
+				}catch (NamingException e) {
+
+					// TODO Auto-generated catch block
+
+					e.printStackTrace();
+
+					}
 				
 
 
@@ -50,7 +76,7 @@ public class ClientAdmin {
 
 					//LIST ALL AppUserS
 					if(option==0) {
-						printallAppUsers();
+						printallAppUsers(ejb);
 					}
 
 
@@ -72,7 +98,7 @@ public class ClientAdmin {
 						System.out.print("Choose a pending task (Type 0 to exit): ");
 						int option2=lerInt(0,tasks.size()+1);
 						if(option2!=0) {
-							SelectTask(tasks,option2-1);
+							SelectTask(tasks,option2-1,ejb);
 						}
 
 						Sender sender=new Sender("queue/AddQueue");
@@ -91,14 +117,14 @@ public class ClientAdmin {
 					    AppUser = scanner.nextLine();  // Read AppUser input
 						System.out.println("\n");
 					    if(!AppUser.equals("")) {
-					    	String status = ActivateAppUser(GetAppUser(AppUser).get(0));
+					    	String status = ejb.ActivateAppUser(ejb.GetAppUser(AppUser).get(0));
 							System.out.println("O User foi "+ status +"!");
 					    }
 					}
 
 					//LIST PUBLICATIONS
 					if(option==3) {
-						printallpubs(GetallPubs());
+						printallpubs(ejb.GetallPubs());
 					}
 
 					//SEARCH PUBLICATION
@@ -108,7 +134,7 @@ public class ClientAdmin {
 					    bookname = scanner.nextLine();  // Read AppUser input
 						System.out.println("\n");
 						if(!bookname.equals("")) {
-							printallpubs(GetPublicationByNome(bookname));	
+							printallpubs(ejb.GetPublicationByNome(bookname));	
 						}
 					}
 
@@ -147,168 +173,13 @@ public class ClientAdmin {
 				return num;
 			}
 			
-//=========================GET DATABASE INFO=============================================================
-
-
-
-			//GET ALL AppUserS
-			public static List<AppUser> GetallAppUsers(){
-				EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
-				EntityManager em = emfactory.createEntityManager( );
-			    // Define query String
-			    String jpql = "SELECT u FROM AppUser u";
-			    // Create a (typed) query
-			    TypedQuery<AppUser> typedQuery = em.createQuery(jpql, AppUser.class);
-			    // Query and get result
-			    List<AppUser> mylist = typedQuery.getResultList();
-			    return mylist;
-			 }
-			
-			//GET AppUser By name
-			public static List<AppUser> GetAppUser(String nome){
-				EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
-				EntityManager em = emfactory.createEntityManager( );
-			    // Define query String
-			    String jpql = "SELECT u FROM AppUser u where u.username=:name";
-			    // Create a (typed) query
-			    TypedQuery<AppUser> typedQuery = em.createQuery(jpql, AppUser.class);
-			    // Set parameter
-			 	typedQuery.setParameter("name", nome);
-			    // Query and get result
-			    List<AppUser> mylist = typedQuery.getResultList();
-			    return mylist;
-			 }
-
-			//GET ALL PUBS
-			public static List<Publication> GetallPubs(){
-				EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
-				EntityManager em = emfactory.createEntityManager( );
-			    // Define query String
-			    String jpql = "SELECT r FROM Publication r";
-			    // Create a (typed) query
-			    TypedQuery<Publication> typedQuery = em.createQuery(jpql, Publication.class);
-			    // Query and get result
-			    List<Publication> mylist = typedQuery.getResultList();
-			    return mylist;
-			 }
-
-			//GET PUBS BY NOME
-			public static List<Publication> GetPublicationByNome(String nome){
-				EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
-				EntityManager em = emfactory.createEntityManager( );
-				// Define query String
-				String jpql = "SELECT r FROM Publication r where r.name=:name";
-				// Create a (typed) query
-				TypedQuery<Publication> typedQuery = em.createQuery(jpql, Publication.class);
-				// Set parameter
-				typedQuery.setParameter("name", nome);
-				// Query and get result
-				List<Publication> mylist = typedQuery.getResultList();
-				return mylist;
-			}
-
-			//ADD AppUser
-			public static void AddAppUser(AppUser st) {
-				EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
-				EntityManager entitymanager = emfactory.createEntityManager( );
-				entitymanager.getTransaction( ).begin( );
-				List<AppUser> mylist = GetallAppUsers();
-				if (mylist.size()==0) {
-					st.setAdmin(true);
-				}
-				entitymanager.persist(st);
-				entitymanager.getTransaction( ).commit( );
-				entitymanager.close( );
-				emfactory.close( );
-			}
-
-			//ADD PUBLICATION
-			public static void AddPublication(Publication st) {
-				EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
-				EntityManager entitymanager = emfactory.createEntityManager( );
-				entitymanager.getTransaction( ).begin( );
-				entitymanager.persist(st);
-				entitymanager.getTransaction( ).commit( );
-				entitymanager.close( );
-				emfactory.close( );
-			}
-
-			//UPDATE PUBLICATION
-			public static void UpdatePublication(Publication st, String old) {
-				EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
-				EntityManager em = emfactory.createEntityManager( );
-			    em.getTransaction().begin();
-			    
-			    if(st.getType().compareTo("")!=0) {
-			    	Query query = em.createQuery("UPDATE Publication p SET p.type =: tipo "
-				            + "WHERE p.name =: oldname");
-			    	query.setParameter("tipo", st.getType());
-				    query.setParameter("oldname", old);
-				    query.executeUpdate();
-			    }
-			    if(st.getDate().compareTo("")!=0) {
-			    	Query query = em.createQuery("UPDATE Publication p SET p.date =: data "
-				            + "WHERE p.name =: oldname");
-			    	query.setParameter("data", st.getDate());
-				    query.setParameter("oldname", old);
-				    query.executeUpdate();
-			    }
-			    if(st.getName().compareTo("")!=0) {
-			    	Query query = em.createQuery("UPDATE Publication p SET p.name =: nome "
-				            + "WHERE p.name =: oldname");
-			    	query.setParameter("nome", st.getName());
-				    query.setParameter("oldname", old);
-				    query.executeUpdate();
-			    }
-			    em.getTransaction().commit();
-			    em.close();
-			}
-
-			//REMOVE A PUBLICATION
-			public static void RemovePublication(String pubname) {
-				EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
-				EntityManager em = emfactory.createEntityManager( );
-				em.getTransaction().begin();
-			    Query query = em.createQuery("DELETE FROM Publication p WHERE p.name = :Name ");
-			    query.setParameter("Name", pubname);
-			    query.executeUpdate();
-			    em.getTransaction().commit();
-			    em.close();
-			}
-
-			//ACTIVATE OR DEACTIVATE A AppUser
-			public static String ActivateAppUser(AppUser st) {
-				String returnar = null;
-				EntityManagerFactory emfactory = Persistence.createEntityManagerFactory( "Loader" );
-				EntityManager em = emfactory.createEntityManager( );
-				em.getTransaction().begin();
-				if(st.isActivated()==false) {
-					Query query = em.createQuery("UPDATE AppUser u SET u.activated = TRUE "
-				            + "WHERE u.username = :Name");
-				    query.setParameter("Name", st.getUsername());
-				    query.executeUpdate();
-				    returnar="ativado";
-				}
-				else {
-					Query query = em.createQuery("UPDATE AppUser u SET u.activated = FALSE "
-				            + "WHERE u.username = :Name");
-				    query.setParameter("Name", st.getUsername());
-				    query.executeUpdate();
-				    returnar="desativado";
-				}
-
-			    em.getTransaction().commit();
-			    em.close();
-			    return returnar;
-			}
-
-			
+	
 
 
 	//=========================PRINT DATABASE INFO=============================================================
 			//PRINT ALL AppUserS INFO
-			public static void printallAppUsers() {
-				List<AppUser> mylist = GetallAppUsers();
+			public static void printallAppUsers(actionbeanRemote ejb) {
+				List<AppUser> mylist = ejb.GetallAppUsers();
 				for(int i=0;i<mylist.size();i++) {
 					System.out.println("Utilizador " + (i+1) +":");
 					System.out.println("AppUsername: " + mylist.get(i).getUsername());
@@ -347,7 +218,7 @@ public class ClientAdmin {
 
 			//SELECT A TASK
 			//RETURNS ARRAYLIST WITH DECLINED TASK OR ACCEPTED
-			public static ArrayList<String> SelectTask(ArrayList<String> tasks, int choice) throws NamingException {
+			public static ArrayList<String> SelectTask(ArrayList<String> tasks, int choice,actionbeanRemote ejb) throws NamingException {
 			    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 			    boolean done=false;
 			    Sender a = null;
@@ -358,7 +229,7 @@ public class ClientAdmin {
 				    String answer = scanner.nextLine();  // Read AppUser input
 					if(answer.compareTo("accept")==0) {
 						a = new Sender("topic/playTopic");
-						DoTask(tasks.get(choice));
+						DoTask(tasks.get(choice),ejb);
 						
 						
 						if(tasks.get(choice).startsWith("Registo")) {
@@ -385,19 +256,19 @@ public class ClientAdmin {
 
 
 			//PARSE TASK AND EXECUTE
-			public static void DoTask(String task) {
+			public static void DoTask(String task,actionbeanRemote ejb) {
 				String[] tokens = task.split(":");
 				//REGISTAR(Registo:AppUsername:Password)
 				if(tokens[0].compareTo("Registo")==0) {
 					AppUser novo= new AppUser(tokens[1],tokens[2]);
-					AddAppUser(novo);
+					ejb.AddAppUser(novo);
 					System.out.println("Utilizador " + tokens[1] + " adicionado com sucesso!");
 					//Mandar mensagem de volta ao AppUser
 				}
 				//ADICIONAR(Adicionar:TestePub:Book:March 2013)
 				else if(tokens[0].compareTo("Adicionar")==0) {
 					Publication novo = new Publication(tokens[1],tokens[2],tokens[3]);
-					AddPublication(novo);
+					ejb.AddPublication(novo);
 					System.out.println("Publication " + tokens[1] + " adicionada com sucesso!");
 					//Mandar notificacao para todos
 				}
@@ -405,13 +276,13 @@ public class ClientAdmin {
 				else if(tokens[0].compareTo("Update")==0) {
 					Publication updated=new Publication(tokens[2],tokens[3],tokens[4]);
 					String oldname=tokens[1];
-					UpdatePublication(updated,oldname);
+					ejb.UpdatePublication(updated,oldname);
 					System.out.println("Publication atualizada!");
 					//Mandar notificacao para todos
 				}
 				//REMOVE(Remover:TestePubv2)
 				else if(tokens[0].compareTo("Remover")==0) {
-					RemovePublication(tokens[1]);
+					ejb.RemovePublication(tokens[1]);
 					System.out.println("Publication removida!");
 					//Mandar notificacao para todos
 				}
