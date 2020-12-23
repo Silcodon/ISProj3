@@ -185,7 +185,10 @@ public class actionbean implements actionbeanRemote, actionbeanLocal {
 
 				//ACTIVATE OR DEACTIVATE A AppUser
 				@Override
-				public String ActivateAppUser(AppUser st) {
+				public String ActivateAppUser(String nome) {
+					List<AppUser> lista = GetAppUser(nome);
+					AppUser st=lista.get(0);
+					
 					String returnar = null;
 					if(st.isActivated()==false) {
 						Query query = em.createQuery("UPDATE AppUser u SET u.activated = TRUE "

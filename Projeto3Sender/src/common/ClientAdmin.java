@@ -76,7 +76,8 @@ public class ClientAdmin {
 
 					//LIST ALL AppUserS
 					if(option==0) {
-						printallAppUsers(ejb);
+						List<AppUser> mylist = ejb.GetallAppUsers();
+						printallAppUsers(mylist);
 					}
 
 
@@ -117,7 +118,7 @@ public class ClientAdmin {
 					    AppUser = scanner.nextLine();  // Read AppUser input
 						System.out.println("\n");
 					    if(!AppUser.equals("")) {
-					    	String status = ejb.ActivateAppUser(ejb.GetAppUser(AppUser).get(0));
+					    	String status = ejb.ActivateAppUser(AppUser);
 							System.out.println("O User foi "+ status +"!");
 					    }
 					}
@@ -178,8 +179,8 @@ public class ClientAdmin {
 
 	//=========================PRINT DATABASE INFO=============================================================
 			//PRINT ALL AppUserS INFO
-			public static void printallAppUsers(actionbeanRemote ejb) {
-				List<AppUser> mylist = ejb.GetallAppUsers();
+			public static void printallAppUsers(List<AppUser> mylist) {
+				
 				for(int i=0;i<mylist.size();i++) {
 					System.out.println("Utilizador " + (i+1) +":");
 					System.out.println("AppUsername: " + mylist.get(i).getUsername());

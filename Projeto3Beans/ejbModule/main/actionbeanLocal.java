@@ -21,7 +21,7 @@ public interface actionbeanLocal {
 	void AddPublication(Publication st);
 	void UpdatePublication(Publication st, String old);
 	void RemovePublication(String pubname);
-	String ActivateAppUser(AppUser st);
+	String ActivateAppUser(String nome);
 
 
 }
