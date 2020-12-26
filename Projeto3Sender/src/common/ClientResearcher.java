@@ -64,8 +64,9 @@ public class ClientResearcher{
 					//AppUser utilizador = new AppUser(AppUsername,password);
 					//Enviar msg ao admin para confirmar registo
 					Sender sender = new Sender("queue/AddQueue");
-					sender.send("Registo:"+AppUsername+":"+password);
 					System.out.println("Aguarde pela confirmacao do admin para efetuar login!");
+					sender.send_and_reply("Registo:"+AppUsername+":"+password);
+					
 				}
 
 			}
@@ -87,7 +88,7 @@ public class ClientResearcher{
 						
 					}
 					
-					if(!user2log.get(0).isAdmin()){
+					else if(!user2log.get(0).isAdmin()){
 						
 						appAppUser(user2log.get(0));
 					}else {

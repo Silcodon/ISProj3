@@ -1,6 +1,7 @@
 package classes;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -23,16 +24,19 @@ import javax.persistence.TypedQuery;
 public class AsyncReceiver implements MessageListener{
 	private ConnectionFactory connectionFactory;
 	private Destination destination;
+	private List<Destination> list_dest;
 	
 	
 	public AsyncReceiver() throws NamingException{
 		this.connectionFactory = InitialContext.doLookup("jms/RemoteConnectionFactory");
 		this.destination = InitialContext.doLookup("jms/queue/playQueue");
+		this.list_dest = new ArrayList<Destination>();
 	}
 	
 	public AsyncReceiver(String destinationQueue) throws NamingException{
 		this.connectionFactory = InitialContext.doLookup("jms/RemoteConnectionFactory");
 		this.destination = InitialContext.doLookup("jms/"+destinationQueue);
+		this.list_dest = new ArrayList<Destination>();
 	}
 	
 	
@@ -87,14 +91,24 @@ public class AsyncReceiver implements MessageListener{
 	}
 	
 	
-	public String receive(){
+	public String receive() throws JMSException{
 		String msg = null;
 		try (JMSContext context = connectionFactory.createContext("Antonio", "Antoniomaria2");){
 			JMSConsumer mc = context.createConsumer(destination);
-			msg = mc.receiveBody(String.class,1000);
-			if(msg!=null) {
-				System.out.println("Message received:" + msg);	
+			TextMessage tmsg = (TextMessage) mc.receive(2000);
+		
+			Destination lixo = this.destination;
+			if(tmsg!=null) {
+				msg = tmsg.getText();
+				System.out.println("Message received:" + msg);
+				if(tmsg.getJMSReplyTo()!=null) {
+					this.list_dest.add(tmsg.getJMSReplyTo());
+				}else {
+					this.list_dest.add(lixo);
+				}
+				
 			}
+			
 		}
 		catch (JMSRuntimeException re){
 			re.printStackTrace();
@@ -102,6 +116,13 @@ public class AsyncReceiver implements MessageListener{
 		return msg;
 	}
 	
+	public Destination get_dest(int i) {
+		return this.list_dest.get(i);
+	}
+	
+	public void remove_dest(int i) {
+		this.list_dest.remove(i);
+	}
 	public void receive_and_reply() throws JMSException {
 		try (JMSContext context = connectionFactory.createContext("Antonio", "Antoniomaria2");){
 			JMSConsumer consumer = context.createConsumer(destination);

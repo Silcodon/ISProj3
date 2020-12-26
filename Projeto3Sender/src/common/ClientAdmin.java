@@ -11,6 +11,7 @@ import java.util.Properties;
 import java.util.Scanner;
 
 import javax.ejb.EJB;
+import javax.jms.JMSException;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -29,7 +30,7 @@ import main.actionbeanRemote;
 public class ClientAdmin {
 	
 	//MENU DE ADMIN
-			public static void main(String[] args) throws NamingException {
+			public static void main(String[] args) throws NamingException, JMSException {
 				boolean done  = false;
 			    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 			    ArrayList<String> tasks = new ArrayList<String>();
@@ -99,13 +100,20 @@ public class ClientAdmin {
 						System.out.print("Choose a pending task (Type 0 to exit): ");
 						int option2=lerInt(0,tasks.size()+1);
 						if(option2!=0) {
-							SelectTask(tasks,option2-1,ejb);
+							SelectTask(tasks,option2-1,ejb,asyncReceiver);
+							
 						}
 
 						Sender sender=new Sender("queue/AddQueue");
 						//Se não fizer nada voltar a mandar para a queue para não se perderem e outro admin puder executa-las
 						for(int j=0;j<tasks.size();j++) {
-							sender.send(tasks.get(j));
+							if(tasks.get(j).startsWith("Registo")) {
+								sender.send_and_set_dest(tasks.get(j), asyncReceiver.get_dest(j));
+							}
+							else{
+								sender.send(tasks.get(j));
+							}
+							
 						}
 						tasks.clear();
 						
@@ -219,7 +227,7 @@ public class ClientAdmin {
 
 			//SELECT A TASK
 			//RETURNS ARRAYLIST WITH DECLINED TASK OR ACCEPTED
-			public static ArrayList<String> SelectTask(ArrayList<String> tasks, int choice,actionbeanRemote ejb) throws NamingException {
+			public static ArrayList<String> SelectTask(ArrayList<String> tasks, int choice,actionbeanRemote ejb, AsyncReceiver aReceiver ) throws NamingException {
 			    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 			    boolean done=false;
 			    Sender a = null;
@@ -230,16 +238,19 @@ public class ClientAdmin {
 					System.out.println("Type 'exit' to cancel");
 				    String answer = scanner.nextLine();  // Read AppUser input
 					if(answer.compareTo("accept")==0) {
-						DoTask(tasks.get(choice),ejb);
+						DoTask(tasks.get(choice),ejb, aReceiver,choice);
 						tasks.remove(choice);
+						aReceiver.remove_dest(choice);
 						done=true;
 					}
 					else if(answer.compareTo("decline")==0) {
 						if(tasks.get(choice).startsWith("Registo")) {
 							a=new Sender("topic/playTopic");
-							a.note_ALL("USER REJEITADO");
+							a.send("o seu registo foi rejeitado", aReceiver.get_dest(choice));
+							
 						}
 						tasks.remove(choice);
+						aReceiver.remove_dest(choice);
 						done=true;
 					}
 					else if(answer.compareTo("exit")==0) {
@@ -254,7 +265,7 @@ public class ClientAdmin {
 
 
 			//PARSE TASK AND EXECUTE
-			public static void DoTask(String task,actionbeanRemote ejb) throws NamingException {
+			public static void DoTask(String task,actionbeanRemote ejb, AsyncReceiver aReceiver,int k) throws NamingException {
 				String[] tokens = task.split(":");
 				Sender a = new Sender("topic/playTopic");
 				//REGISTAR(Registo:AppUsername:Password)
@@ -264,14 +275,14 @@ public class ClientAdmin {
 						ejb.AddAppUser(novo);
 						System.out.println("Utilizador " + tokens[1] + " adicionado com sucesso!");
 						//Mandar mensagem de volta ao AppUser
-						a.note_ALL("USER REGISTADO");
-
+						a.send("o seu registo foi aceite", aReceiver.get_dest(k));
+						
 					}
 					else {
 						System.out.println("Utilizador " + tokens[1] + " já registado!");
 						//Mandar mensagem de volta ao AppUser
-						a.note_ALL("USER REJEITADO");
-
+						a.send("já existe alguem com esse username registado", aReceiver.get_dest(k));
+						
 					}
 				}
 				//ADICIONAR(Adicionar:TestePub:Book:March 2013)
@@ -280,7 +291,7 @@ public class ClientAdmin {
 					ejb.AddPublication(novo);
 					System.out.println("Publication " + tokens[1] + " adicionada com sucesso!");
 					//Mandar notificacao para todos
-					a.note_ALL( task + " ACEITE PELO ADMIN!\n");
+					a.note_ALL( "A publicação '" + tokens[1] + "' foi adicionada");
 				}
 				//UPDATE(Update:TestePub:TestePubv2:Book:March 2014)
 				else if(tokens[0].compareTo("Update")==0) {
@@ -289,14 +300,14 @@ public class ClientAdmin {
 					ejb.UpdatePublication(updated,oldname);
 					System.out.println("Publication atualizada!");
 					//Mandar notificacao para todos
-					a.note_ALL( task + " ACEITE PELO ADMIN!\n");
+					a.note_ALL( "A publicação '" + tokens[1] + "' foi alterada para '"+tokens[2]+ "'" );
 				}
 				//REMOVE(Remover:TestePubv2)
 				else if(tokens[0].compareTo("Remover")==0) {
 					ejb.RemovePublication(tokens[1]);
 					System.out.println("Publication removida!");
 					//Mandar notificacao para todos
-					a.note_ALL( task + " ACEITE PELO ADMIN!\n");
+					a.note_ALL( "A publicação '" + tokens[1] + "' foi removida ! ");
 				}
 				else {
 					System.out.println("Something went wrong with parsing! :(");

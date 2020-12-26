@@ -187,25 +187,31 @@ public class actionbean implements actionbeanRemote, actionbeanLocal {
 				@Override
 				public String ActivateAppUser(String nome) {
 					List<AppUser> lista = GetAppUser(nome);
-					AppUser st=lista.get(0);
-					
-					String returnar = null;
-					if(st.isActivated()==false) {
-						Query query = em.createQuery("UPDATE AppUser u SET u.activated = TRUE "
-					            + "WHERE u.username = :Name");
-					    query.setParameter("Name", st.getUsername());
-					    query.executeUpdate();
-					    returnar="ativado";
-					}
-					else {
-						Query query = em.createQuery("UPDATE AppUser u SET u.activated = FALSE "
-					            + "WHERE u.username = :Name");
-					    query.setParameter("Name", st.getUsername());
-					    query.executeUpdate();
-					    returnar="desativado";
-					}
+					if(lista.size()>0) {
+						AppUser st= lista.get(0);
+						String returnar = null;
+						if(st.isActivated()==false) {
+							Query query = em.createQuery("UPDATE AppUser u SET u.activated = TRUE "
+						            + "WHERE u.username = :Name");
+						    query.setParameter("Name", st.getUsername());
+						    query.executeUpdate();
+						    returnar="ativado";
+						}
+						else {
+							Query query = em.createQuery("UPDATE AppUser u SET u.activated = FALSE "
+						            + "WHERE u.username = :Name");
+						    query.setParameter("Name", st.getUsername());
+						    query.executeUpdate();
+						    returnar="desativado";
+						}
 
-				    return returnar;
+					    return returnar;
+					}
+					
+					return  "não encontrado";
+					
+					
+					
 				}
 
 

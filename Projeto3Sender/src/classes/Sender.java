@@ -66,7 +66,30 @@ public class Sender {
 			re.printStackTrace();
 		}
 	}
-	
+	public void send(String text, Destination dest) {
+		try (JMSContext context = connectionFactory.createContext("Antonio", "Antoniomaria2");){
+			JMSProducer messageProducer = context.createProducer();
+			messageProducer.send(dest, text);
+		}
+		catch (Exception re){
+			System.out.println("\nO utilizador já não está online e não foi possivel enviar notificação\n");
+		}
+	}
+	public void send_and_set_dest(String text,Destination dest) {
+		try (JMSContext context = connectionFactory.createContext("Antonio", "Antoniomaria2");){
+			JMSProducer messageProducer = context.createProducer();
+			TextMessage msg = context.createTextMessage();
+			Destination tmp = dest;
+			msg.setJMSReplyTo(tmp);
+			msg.setText(text);
+			messageProducer.send(destination, msg);
+			
+		}
+		catch (Exception re){
+			re.printStackTrace();
+		}
+		
+	}
 	
 	public void send_and_reply(String text) {
 		try (JMSContext context = connectionFactory.createContext("Antonio", "Antoniomaria2");){
@@ -78,7 +101,7 @@ public class Sender {
 			messageProducer.send(destination, msg);
 			JMSConsumer cons = context.createConsumer(tmp);
 			String str = cons.receiveBody(String.class);
-			System.out.println("I received the reply sent to the temporary queue: " + str);
+			System.out.println(str);
 		}
 		catch (Exception re){
 			re.printStackTrace();
