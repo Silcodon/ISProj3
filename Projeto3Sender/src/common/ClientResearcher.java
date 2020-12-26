@@ -244,7 +244,7 @@ public class ClientResearcher{
 				if(option==5) {
 					System.out.println("You have successfully logged out.");
 	                done = true;
-	                thread.join();
+	                thread.interrupt();
 				}
 			}
 		}

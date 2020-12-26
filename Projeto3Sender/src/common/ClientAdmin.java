@@ -223,25 +223,22 @@ public class ClientAdmin {
 			    Scanner scanner = new Scanner(System.in);  // Create a Scanner object
 			    boolean done=false;
 			    Sender a = null;
+			    
 				System.out.println("Task selected: " + tasks.get(choice));
 				while(!done) {
 					System.out.println("Do you want to accept or decline?");
 					System.out.println("Type 'exit' to cancel");
 				    String answer = scanner.nextLine();  // Read AppUser input
 					if(answer.compareTo("accept")==0) {
-						a = new Sender("topic/playTopic");
 						DoTask(tasks.get(choice),ejb);
-						
-						
-						if(tasks.get(choice).startsWith("Registo")) {
-							a.note_ALL("USER REGISTADO");
-						}else {
-							a.note_ALL( tasks.get(choice) + " ACEITE PELO ADMIN!\n");
-						}
 						tasks.remove(choice);
 						done=true;
 					}
 					else if(answer.compareTo("decline")==0) {
+						if(tasks.get(choice).startsWith("Registo")) {
+							a=new Sender("topic/playTopic");
+							a.note_ALL("USER REJEITADO");
+						}
 						tasks.remove(choice);
 						done=true;
 					}
@@ -257,14 +254,25 @@ public class ClientAdmin {
 
 
 			//PARSE TASK AND EXECUTE
-			public static void DoTask(String task,actionbeanRemote ejb) {
+			public static void DoTask(String task,actionbeanRemote ejb) throws NamingException {
 				String[] tokens = task.split(":");
+				Sender a = new Sender("topic/playTopic");
 				//REGISTAR(Registo:AppUsername:Password)
 				if(tokens[0].compareTo("Registo")==0) {
-					AppUser novo= new AppUser(tokens[1],tokens[2]);
-					ejb.AddAppUser(novo);
-					System.out.println("Utilizador " + tokens[1] + " adicionado com sucesso!");
-					//Mandar mensagem de volta ao AppUser
+					if((ejb.GetAppUser(tokens[1]).size()==0)){
+						AppUser novo= new AppUser(tokens[1],tokens[2]);
+						ejb.AddAppUser(novo);
+						System.out.println("Utilizador " + tokens[1] + " adicionado com sucesso!");
+						//Mandar mensagem de volta ao AppUser
+						a.note_ALL("USER REGISTADO");
+
+					}
+					else {
+						System.out.println("Utilizador " + tokens[1] + " já registado!");
+						//Mandar mensagem de volta ao AppUser
+						a.note_ALL("USER REJEITADO");
+
+					}
 				}
 				//ADICIONAR(Adicionar:TestePub:Book:March 2013)
 				else if(tokens[0].compareTo("Adicionar")==0) {
@@ -272,6 +280,7 @@ public class ClientAdmin {
 					ejb.AddPublication(novo);
 					System.out.println("Publication " + tokens[1] + " adicionada com sucesso!");
 					//Mandar notificacao para todos
+					a.note_ALL( task + " ACEITE PELO ADMIN!\n");
 				}
 				//UPDATE(Update:TestePub:TestePubv2:Book:March 2014)
 				else if(tokens[0].compareTo("Update")==0) {
@@ -280,12 +289,14 @@ public class ClientAdmin {
 					ejb.UpdatePublication(updated,oldname);
 					System.out.println("Publication atualizada!");
 					//Mandar notificacao para todos
+					a.note_ALL( task + " ACEITE PELO ADMIN!\n");
 				}
 				//REMOVE(Remover:TestePubv2)
 				else if(tokens[0].compareTo("Remover")==0) {
 					ejb.RemovePublication(tokens[1]);
 					System.out.println("Publication removida!");
 					//Mandar notificacao para todos
+					a.note_ALL( task + " ACEITE PELO ADMIN!\n");
 				}
 				else {
 					System.out.println("Something went wrong with parsing! :(");
